@@ -19,7 +19,7 @@ from hwu_native import patch_libhss
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
-VERSION_CODE = 110
+VERSION_CODE = 120
 
 METHOD_RE = re.compile(r"^\.method\b.*?^\.end method", re.M | re.S)
 LOCALS_RE = re.compile(r"^([ \t]*)\.locals (\d+)\s*$", re.M)
@@ -140,6 +140,8 @@ def patch_smali_tree(smali_root: Path) -> None:
     destination = smali_root / "com/pixelberrystudios/hwuandroid/ModernCompat.smali"
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(COMPAT, destination)
+    for extra in ("OfflineMenu.smali", "OfflineMenu$Click.smali", "OfflineMenu$Open.smali"):
+        shutil.copyfile(ROOT / "patcher" / extra, destination.parent / extra)
     pending = receivers = receivers4 = 0
     for path in smali_root.rglob("*.smali"):
         if path.name == "ModernCompat.smali":
@@ -169,7 +171,65 @@ def patch_smali_tree(smali_root: Path) -> None:
     if needle not in source:
         raise RuntimeError("could not find BaseIabActivity.onCreate")
     if "requestNotifications" not in source:
-        activity.write_text(source.replace(needle, insert, 1), encoding="utf-8")
+        source = source.replace(needle, insert, 1)
+    source = source.replace(
+        ".method protected onCreate(Landroid/os/Bundle;)V\n    .locals 2\n",
+        ".method protected onCreate(Landroid/os/Bundle;)V\n    .locals 4\n",
+        1,
+    )
+    button = """    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/ModernCompat;->requestNotifications(Landroid/app/Activity;)V
+
+    new-instance v0, Landroid/widget/Button;
+
+    invoke-direct {v0, p0}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
+
+    const-string v1, \"OFFLINE\"
+
+    invoke-virtual {v0, v1}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
+
+    new-instance v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Open;
+
+    invoke-direct {v1, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Open;-><init>(Landroid/app/Activity;)V
+
+    invoke-virtual {v0, v1}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    new-instance v1, Landroid/widget/FrameLayout$LayoutParams;
+
+    const/4 v2, -0x2
+
+    invoke-direct {v1, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+
+    const/16 v2, 0x51
+
+    iput v2, v1, Landroid/widget/FrameLayout$LayoutParams;->gravity:I
+
+    invoke-virtual {p0, v0, v1}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+"""
+    marker = "    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/ModernCompat;->requestNotifications(Landroid/app/Activity;)V\n"
+    if "OfflineMenu$Open" not in source:
+        if marker not in source:
+            raise RuntimeError("could not place the offline settings button")
+        source = source.replace(marker, button, 1)
+    result_old = """.method protected onActivityResult(IILandroid/content/Intent;)V
+    .locals 2
+
+    .prologue
+"""
+    result_new = result_old + """    invoke-static {p0, p1, p2, p3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->onResult(Landroid/app/Activity;IILandroid/content/Intent;)Z
+
+    move-result v0
+
+    if-eqz v0, :hwu_offline_continue
+
+    return-void
+
+    :hwu_offline_continue
+"""
+    if "OfflineMenu;->onResult" not in source:
+        if result_old not in source:
+            raise RuntimeError("could not find onActivityResult")
+        source = source.replace(result_old, result_new, 1)
+    activity.write_text(source, encoding="utf-8")
     print(f"smali: {pending} pending intents, {receivers} receivers, {receivers4} exported receivers")
 
 
