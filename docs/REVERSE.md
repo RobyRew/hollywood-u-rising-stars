@@ -1,0 +1,116 @@
+# Hollywood U 3.8.0 notes
+
+These notes are for the personal offline patch of `com.pixelberrystudios.hwuandroid` 3.8.0. The game itself is not in this repo. Addresses are offsets in `lib/armeabi-v7a/libHSS.so`. The first executable LOAD is identity-mapped, so a file offset is the same number as the Thumb address with the low bit cleared.
+
+The phone used for the live checks is an LG Wing, Android 10, not rooted. Frida cannot attach with `frida-server`. The debug build loads `libfrida-gadget.so` and listens on `127.0.0.1:27042`. A normal patch from `patcher/patch_apk.py` does not include the gadget. `tools/frida/quest.js` is the hook list.
+
+## Cash and diamonds
+
+Rings in the scripts are hearts. Hearts are the diamond counter. Coins are the cash counter.
+
+The HUD plus buttons are:
+
+| Function | Address | What a tap does in 1.0.8 |
+| --- | --- | --- |
+| `HUD::addCoinsPressed` | `0x475C6C` | credit 10,000,000 coins |
+| `HUD::addHeartsPressed` | `0x475D4C` | credit 10,000,000 hearts |
+
+Both stubs call `PlayerLogic` through the singleton at `0x3DD234` (`bl` there, then vtable `+0x48`) and then:
+
+| Wallet | Credit function |
+| --- | --- |
+| coins | `0x3E69B4` |
+| hearts | `0x3E69F0` |
+| XP | `0x3E40E0` |
+| stars (books) | `0x3E69D0` |
+| pencils | `0x3E6A10` |
+| tickets | `0x3E6A30` |
+
+The amount is a 32-bit argument in `r1`. 10,000,000 is `0x00989680`.
+
+`BaseIabActivity.startPurchaseFlow` does **not** reach those functions. It builds a Google Play payload and starts the billing UI. The Play servers for this game are gone, so a settings button that only calls `startPurchaseFlow` never adds currency.
+
+The C++ store path is `AppStoreManager::purchase` at `0x4015C8`. That entry branches to the offline cave at `0x3A43FA`. The cave reads the product id (`hwu_coins_5000` grants 5000 coins, and parsing stops at the first non-digit). When it finishes, `0x3A44AA` branches to `0x3A4540`, which also grants 10,000,000 coins and 10,000,000 hearts and then calls `firePurchaseCompleted` at `0x4028D4`.
+
+The gear menu cannot add a new JNI export without rebuilding the ELF hash tables. It reuses three existing public JNI methods that only ran for the removed SponsorPay offer flow, and calls them on the cocos thread with `GLSurfaceView.queueEvent`:
+
+| JNI method | Address | Grant |
+| --- | --- | --- |
+| `DKSponsorPayOnChangeStatusCloseFinished` | `0x36A7F8` | 10,000,000 cash |
+| `DKSponsorPayOnChangeStatusCloseAborted` | `0x36A850` | 10,000,000 diamonds |
+| `DKSponsorPayOnChangeStatusError` | `0x36A8A8` | 5,000,000 XP |
+
+## Quest bypass
+
+`QuestLogic::evaluateQuestState` at `0x3ED7CC` is the switch the quest card uses. `getQuestState` at `0x3ED9F0` is a 56-byte wrapper around it.
+
+| Return | Meaning on the quest card |
+| --- | --- |
+| 1 | Locked, or not viewable |
+| 2 | Can be started (`startActiveQuest` at `0x3B6D40`) |
+| 3 | Started, requirements still open |
+| 4 | Ready to collect (`startQuestRewardCollection` at `0x3B5D48`) |
+
+The body is small:
+
+- Quest proto byte `+0x1C` is the started flag.
+- If it is not started, a viewable quest returns 2 and a hidden one returns 1.
+- If it is started and viewable, bit 11 of the dword at `+0x54` means “this quest has completion requirements”.
+- That bit set calls `meetsPassiveCompletionRequirements` at `0x3ECC58`. True returns 4. False returns 3.
+- That bit clear returns 4 immediately. Those quests only need to be started.
+
+`QuestSelectionScreenState::handleQuestActionButton` at `0x3B72C4` is the card button. State 2 starts the quest, state 4 collects the reward through the real game path, state 3 tries the in-progress action.
+
+1.0.8 makes two predicates return true:
+
+- `meetsPassiveCompletionRequirements` (`0x3ECC58`) so a started quest is ready to collect.
+- `doesCharacterMeetRequirement` (`0x3E7928`) so a character slot accepts the character you send.
+
+Open the quest and tap it. The collect path is still the game’s own reward function, so the next quest and the reward dialog stay intact. Quest files that were never shipped in the 3.8.0 APK are still absent. Forcing `isQuestCompleted` (`0x3E71F4`) true was not done: that function walks the chain and reports whether an earlier quest id is already behind the current one, and a permanent true there skips the reward handoff.
+
+`advanceToNextQuestInChain` is `0x3EE044`. It takes the quest id string and moves the chain. The settings screen does not call it directly because the reward button already does, once the requirement check passes.
+
+## Other gates already forced open
+
+These return true (`movs r0, #1; bx lr`) unless noted:
+
+| Check | Address |
+| --- | --- |
+| `isCurrencyItemUnlocked` | `0x3F50B8` |
+| `isCurrencyBuildingUnlocked` | `0x3F4FF8` |
+| `isCurrencyClothingUnlocked` | `0x3F3F34` |
+| `isClothingUnlocked` | `0x3D6834` |
+| `isMakeoverUnlocked` | `0x3CD95C` |
+| `EducationLogic::isUnlocked` | `0x3D8E04` |
+| `ExpansionLogic::isUnlocked` | `0x3DB544` |
+| `ClothingLogic::isLocked` | `0x3D6750` returns false |
+| `setLocked` | `0x4AD860` ignores the flag and clears the badge |
+| `areProductsAvailable` / `hasProduct` / `canPurchase` | `0x4014D0` / `0x401568` / `0x4015BC` |
+| tutorial start, triggers, and `isTutorialActive` | `0x400EA4`, `0x400EE0`, `0x3FB224` |
+
+Account-creation branches inside `purchaseItem` (`0x3BF686`, `0x3BF6EC`) and `purchaseCurrency` (`0x3C069C`, `0x3C0700`) no longer divert into the dead create-account server. The currency and clothing “network error” branches are `0x3C219C`, `0x3C2660`, and `0x45ADA0`.
+
+## Settings gear
+
+The cocos settings card is `SettingsDialogState`. `onInit` is `0x3B9204`. The map callback that opens it is `WorldMapState::menuSettingsCallback` at `0x38BAA8`. That gear is not on the HUD for a save that never finished the tutorial, because the icon setup around `0x38CD00` bails out on a progress bit.
+
+1.0.8 does not replace that cocos widget. `OfflineMenu.attach` adds a blue rounded button in the same column as the other HUD buttons (under the hide button on a 2460×1080 landscape frame) and opens the RR Mod Settings panel on top of the game, including while the game’s own settings dialog is up. The panel is an Android dialog styled with the game’s blue and white, not a system alert list.
+
+## Frida on this phone
+
+```bash
+adb forward tcp:27042 tcp:27042
+python3 - << 'PY'
+import frida
+dev = frida.get_device_manager().add_remote_device('127.0.0.1:27042')
+session = dev.attach('Gadget')
+script = session.create_script(open('tools/frida/quest.js').read())
+script.on('message', lambda m, d: print(m))
+script.load()
+input()
+PY
+```
+
+Hook the Thumb entry with the low bit set. `evaluateQuestState`’s return is the table above. `addCoinsPressed` and `addHeartsPressed` log when the HUD plus buttons run.
+
+On the LG Wing build of 1.0.8 the hook showed `meetsPassiveCompletionRequirements` returning 1 and `evaluateQuestState` returning 4, which is the collect-reward state. The gear opened RR Mod Settings over the campus, and the cash and diamond counters moved by exact multiples of 10,000,000. The game’s own settings card has the OFFLINE row, which calls the same panel.

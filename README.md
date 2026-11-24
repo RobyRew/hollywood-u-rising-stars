@@ -18,13 +18,15 @@ This repository does **not** contain the game. Hollywood U is copyright Pixelber
 | Currency and clothing tabs | The “Network error. Cannot access currency store” path is skipped. The clothing tab’s matching network error is skipped too. |
 | Level and quest locks | Store items, buildings, clothes, makeovers, classes, and campus plots no longer check level or quest requirements. Lock badges are forced off. |
 | Admissions office | Recruiting is no longer blocked by the “office is full” check. |
-| OFFLINE button | A button on the game screen opens offline settings: export, import, and grants. It sits above the game, including while the normal settings dialog is open. |
+| RR gear | A blue gear in the HUD column opens RR Mod Settings: 10,000,000 cash, 10,000,000 diamonds, 5,000,000 XP, export, and import. It stays up while the game’s own settings dialog is open. |
+| Quest bypass | A started quest treats its requirements as done, and a character slot accepts the character you send. Open the quest and tap it to collect. |
+| HUD plus buttons | The cash and diamond plus buttons each add 10,000,000. |
 | Skip tutorial | `startTutorial` and later tutorial triggers return immediately, and the “tutorial is active” check stays false, so a half-finished tutorial does not lock the campus. |
 | Save export and import | Export writes the real `files/`, `shared_prefs/`, and `databases/` data into a `.hollywoodujson` file. Import puts those bytes back and restarts the game. |
 
 In the game, rings are the premium currency (the code calls them hearts) and coins are cash. Books are stars.
 
-The offline menu grants are `hwu_rings_1000`, `hwu_coins_10000`, `hwu_stars_500`, `hwu_pencils_100`, `hwu_tickets_25`, and `hwu_xp_2000`. The number in the id is the amount added.
+A store product id such as `hwu_rings_1490` or `hwu_coins_5000` still grants the number in the id. The gear menu and the HUD plus buttons grant 10,000,000 cash or diamonds on their own path.
 
 ## Requirements
 
@@ -40,11 +42,13 @@ Apktool 3.0.3 and uber-apk-signer 1.3.0 are included under `tools/`. Their licen
 python3 patcher/patch_apk.py --apk /path/to/HollywoodU-3.8.0.apk
 ```
 
-The result is `dist/Hollywood-U-3.8.0-tweaks-v4.apk`. The package version name is `3.8.0-tweaks4`. The first run creates `build/offline.keystore` and signs with it. Keep that keystore if you want later builds to install as an update instead of a different app.
+The result is `dist/Hollywood-U-1.0.x.apk`. Every release stays on `1.0.x`. The current one is `1.0.8`. That is the package version name and the filename. The first run creates `build/offline.keystore` and signs with it. Keep that keystore if you want later builds to install as an update instead of a different app.
+
+How the quest card, the plus buttons, and the store payout were traced is written up in [docs/REVERSE.md](docs/REVERSE.md).
 
 ## GitHub build
 
-Push this repo, then create a release named `source-apk` and attach your 3.8.0 APK to that release. The game stays out of git. Run the **Build tweaked APK** workflow. It downloads that release, patches it, and uploads `Hollywood-U-3.8.0-tweaks-v4.apk` as an artifact.
+Push this repo, then create a release named `source-apk` and attach your 3.8.0 APK to that release. The game stays out of git. Run the **Build tweaked APK** workflow. It downloads that release, patches it, and uploads `Hollywood-U-1.0.x.apk` as an artifact.
 
 Every push also runs **Check patcher**, which only compiles the Python.
 
@@ -58,8 +62,9 @@ python3 patcher/patch_apk.py --apk game.apk --out ~/Desktop/HollywoodU-offline.a
 2. If an older copy is installed and Android refuses the update, uninstall that copy first. A new signature cannot replace a different one.
 3. Play Protect will say it has not seen this developer. That is the local signing key. Choose **Install anyway**.
 4. Open the game. If a later dialog offers a local or new game, take it. The campus and the content shipped inside the APK run from the phone.
-5. Tap the **OFFLINE** button at the bottom of the screen for export, import, and grants. It stays available while the game’s own settings dialog is open.
-6. Open the store from the ring or coin button and buy a pack. The amount in the product id is what gets added (`hwu_rings_1490` adds 1490 rings, `hwu_coins_5000` adds 5000 coins). Locked cards can be bought without the level or quest.
+5. Tap the blue gear under the hide button for RR Mod Settings. The cash and diamond plus buttons on the top bar each add 10,000,000.
+6. Open a quest and tap it. Requirements are treated as done, so the game’s own collect button pays the reward and moves the chain on.
+7. Open the store from the ring or coin button and buy a pack. The amount in the product id is added, and the purchase also adds 10,000,000 cash and 10,000,000 diamonds. Locked cards can be bought without the level or quest.
 
 ## Phones it cannot run on
 

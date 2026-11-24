@@ -19,10 +19,12 @@ from hwu_native import patch_libhss
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
-TWEAK_VERSION = 4
-VERSION_CODE = 140
-VERSION_NAME = f"3.8.0-tweaks{TWEAK_VERSION}"
-APK_NAME = f"Hollywood-U-3.8.0-tweaks-v{TWEAK_VERSION}.apk"
+# Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
+VERSION_PATCH = 8
+VERSION_NAME = f"1.0.{VERSION_PATCH}"
+# 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
+VERSION_CODE = 10000 + VERSION_PATCH
+APK_NAME = f"Hollywood-U-{VERSION_NAME}.apk"
 
 METHOD_RE = re.compile(r"^\.method\b.*?^\.end method", re.M | re.S)
 LOCALS_RE = re.compile(r"^([ \t]*)\.locals (\d+)\s*$", re.M)
@@ -143,7 +145,14 @@ def patch_smali_tree(smali_root: Path) -> None:
     destination = smali_root / "com/pixelberrystudios/hwuandroid/ModernCompat.smali"
     destination.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(COMPAT, destination)
-    for extra in ("OfflineMenu.smali", "OfflineMenu$Click.smali", "OfflineMenu$Open.smali"):
+    for extra in (
+        "OfflineMenu.smali",
+        "OfflineMenu$Click.smali",
+        "OfflineMenu$Open.smali",
+        "OfflineMenu$Gear.smali",
+        "OfflineMenu$Row.smali",
+        "OfflineMenu$Run.smali",
+    ):
         shutil.copyfile(ROOT / "patcher" / extra, destination.parent / extra)
     pending = receivers = receivers4 = 0
     for path in smali_root.rglob("*.smali"):
@@ -180,39 +189,6 @@ def patch_smali_tree(smali_root: Path) -> None:
         ".method protected onCreate(Landroid/os/Bundle;)V\n    .locals 4\n",
         1,
     )
-    button = """    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/ModernCompat;->requestNotifications(Landroid/app/Activity;)V
-
-    new-instance v0, Landroid/widget/Button;
-
-    invoke-direct {v0, p0}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
-
-    const-string v1, \"OFFLINE\"
-
-    invoke-virtual {v0, v1}, Landroid/widget/Button;->setText(Ljava/lang/CharSequence;)V
-
-    new-instance v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Open;
-
-    invoke-direct {v1, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Open;-><init>(Landroid/app/Activity;)V
-
-    invoke-virtual {v0, v1}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
-
-    new-instance v1, Landroid/widget/FrameLayout$LayoutParams;
-
-    const/4 v2, -0x2
-
-    invoke-direct {v1, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
-
-    const/16 v2, 0x51
-
-    iput v2, v1, Landroid/widget/FrameLayout$LayoutParams;->gravity:I
-
-    invoke-virtual {p0, v0, v1}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
-"""
-    marker = "    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/ModernCompat;->requestNotifications(Landroid/app/Activity;)V\n"
-    if "OfflineMenu$Open" not in source:
-        if marker not in source:
-            raise RuntimeError("could not place the offline settings button")
-        source = source.replace(marker, button, 1)
     result_old = """.method protected onActivityResult(IILandroid/content/Intent;)V
     .locals 2
 
@@ -232,7 +208,45 @@ def patch_smali_tree(smali_root: Path) -> None:
         if result_old not in source:
             raise RuntimeError("could not find onActivityResult")
         source = source.replace(result_old, result_new, 1)
+    content = "    invoke-virtual {p0, v0}, Lcom/pixelberrystudios/iab/BaseIabActivity;->setContentView(I)V\n"
+    gear = content + "\n    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->attach(Landroid/app/Activity;)V\n"
+    if "OfflineMenu;->attach" not in source:
+        if content not in source:
+            raise RuntimeError("could not find setContentView")
+        source = source.replace(content, gear, 1)
+    if "runOnGame" not in source:
+        source += """
+.method public static runOnGame(Ljava/lang/Runnable;)V
+    .locals 1
+
+    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
+
+    if-eqz v0, :missing
+
+    iget-object v0, v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->j:Lorg/cocos2dx/lib/Cocos2dxGLSurfaceView;
+
+    if-eqz v0, :missing
+
+    invoke-virtual {v0, p0}, Lorg/cocos2dx/lib/Cocos2dxGLSurfaceView;->queueEvent(Ljava/lang/Runnable;)V
+
+    :missing
+    return-void
+.end method
+"""
     activity.write_text(source, encoding="utf-8")
+    helpshift = smali_root / "com/helpshift/bs.smali"
+    if helpshift.is_file():
+        text = helpshift.read_text(encoding="utf-8")
+        old = "    invoke-virtual {v1, v0}, Landroid/content/Context;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;\n"
+        new = (
+            "    :try_start_svc\n"
+            + old
+            + "    :try_end_svc\n"
+            + "    .catch Ljava/lang/IllegalStateException; {:try_start_svc .. :try_end_svc} :catch_svc\n\n"
+            + "    :catch_svc\n"
+        )
+        if old in text and ":try_start_svc" not in text:
+            helpshift.write_text(text.replace(old, new, 1), encoding="utf-8")
     print(f"smali: {pending} pending intents, {receivers} receivers, {receivers4} exported receivers")
 
 
@@ -347,7 +361,7 @@ def patch_native_libs(decoded: Path) -> None:
     shutil.copytree(armeabi, v7a)
     for folder in (armeabi, v7a):
         patch_libhss(folder / "libHSS.so")
-    print(f"native: offline client, store, save menu, tutorial skipped, tweaks v{TWEAK_VERSION}")
+    print(f"native: offline client, store, save menu, tutorial skipped, {VERSION_NAME}")
 
 
 def run(command: list[str]) -> None:
@@ -380,6 +394,12 @@ def main() -> int:
     patch_manifest(args.work / "AndroidManifest.xml")
     patch_styles(args.work)
     patch_smali_tree(args.work / "smali")
+    strings = args.work / "assets" / "strings.json"
+    if strings.is_file():
+        import json
+        table = json.loads(strings.read_text(encoding="utf-8"))
+        table["settings.about"] = "OFFLINE"
+        strings.write_text(json.dumps(table, ensure_ascii=False, separators=(", ", ": ")), encoding="utf-8")
     patch_native_libs(args.work)
 
     unsigned = args.work.parent / "unsigned.apk"

@@ -40,11 +40,12 @@ RETURN_TRUE = {
     0x3F50B8: bytes.fromhex("38b5051c"),  # isCurrencyItemUnlocked
     0x3F4FF8: bytes.fromhex("f0b54746"),  # isCurrencyBuildingUnlocked
     0x3F3F34: bytes.fromhex("70b5ca6e"),  # isCurrencyClothingUnlocked
-    0x3C6D28: bytes.fromhex("70b54b68"),  # canAdmitStudent
     0x3D6834: bytes.fromhex("10b5041c"),  # isClothingUnlocked
     0x3CD95C: bytes.fromhex("10b50ff0"),  # isMakeoverUnlocked
     0x3D8E04: bytes.fromhex("f8b5061c"),  # EducationLogic::isUnlocked
     0x3DB544: bytes.fromhex("10b5041c"),  # ExpansionLogic::isUnlocked
+    0x3ECC58: bytes.fromhex("70b5131c"),  # QuestLogic::meetsPassiveCompletionRequirements
+    0x3E7928: bytes.fromhex("f0b55746"),  # QuestLogic::doesCharacterMeetRequirement
 }
 RETURN_FALSE = {
     0x3D6750: bytes.fromhex("f8b5061c"),  # ClothingLogic::isLocked
@@ -55,6 +56,42 @@ SET_LOCKED = 0x4AD860
 START_TUTORIAL = 0x400EA4
 RUN_TUTORIAL_TRIGGERS = 0x400EE0
 IS_TUTORIAL_ACTIVE = 0x3FB224
+# Buying with no Pixelberry account used to call the dead create-account server
+# and show "Could not make purchase because an account could not be created."
+PURCHASE_ITEM_SKIP_SETUP = 0x3BF686
+PURCHASE_ITEM_REQUIRE_ACCOUNT = 0x3BF6EC
+PURCHASE_CURRENCY_SKIP_SETUP = 0x3C069C
+PURCHASE_CURRENCY_REQUIRE_ACCOUNT = 0x3C0700
+# The settings gear is skipped unless a progress bit is set. That bit stays
+# clear when the tutorial never runs, so the gear has to be added anyway,
+# and the rest of the HUD icons still have to be added after it.
+SETTINGS_ICON_SKIP = 0x38CD00
+SETTINGS_ICON_RETURN = 0x38CE20
+ABOUT_BUTTON = 0x49E87C
+# The + buttons on cash and diamonds. Each tap grants currency directly.
+ADD_COINS = 0x475C6C
+ADD_HEARTS = 0x475D4C
+# 10000000 coins / diamonds. Null-checks the player, then credits. Disassembler-checked.
+ADD_COINS_STUB = bytes.fromhex("10b567f7e1fa002807d003689b6c9847002802d0014970f797fe10bd80969800")
+ADD_HEARTS_STUB = bytes.fromhex("10b567f771fa002807d003689b6c9847002802d0014970f745fe10bd80969800")
+# Public JNI voids the settings screen calls on the game thread.
+# DKSponsorPayOnChangeStatusCloseFinished / CloseAborted / Error.
+GRANT_CASH = 0x36A7F8
+GRANT_DIAMONDS = 0x36A850
+GRANT_XP = 0x36A8A8
+GRANT_CASH_STUB = bytes.fromhex("10b572f01bfd002807d003689b6c9847002802d001497cf0d1f810bd80969800")
+GRANT_DIAMONDS_STUB = bytes.fromhex("10b572f0effc002807d003689b6c9847002802d001497cf0c3f810bd80969800")
+GRANT_XP_STUB = bytes.fromhex("10b572f0c3fc002807d003689b6c9847002802d0014979f00ffc10bd404b4c00")
+PAYOUT_TAIL = bytes.fromhex(
+    "38f078fe03689b6c98470646064942f031fa3046054942f04bfa"
+    "204629465ef0b9f901b0f0bd00bf8096980080969800"
+)
+OFFLINE_CAVE = 0x3A44C0
+GET_STATIC_METHOD = 0x35FD98
+# Every finished store purchase lands here. The tail also pays 10000000 cash
+# and 10000000 diamonds, so a bundle with no plain product id still pays.
+PURCHASE_FINISH = 0x3A44AA
+PAYOUT_EPILOGUE = 0x3A4540
 
 CAVE = SERVER_TIME_FAIL + 18  # immediately after the 18-byte time trampoline
 
@@ -274,6 +311,78 @@ def _purchase_cave() -> bytes:
     return bytes(out)
 
 
+def _offline_menu_cave() -> bytes:
+    """Call OfflineMenu.showFromGame from the settings card's About button."""
+    cls = b"com/pixelberrystudios/hwuandroid/OfflineMenu\x00"
+    method = b"showFromGame\x00"
+    sig = b"()V\x00"
+    body = bytearray(
+        bytes.fromhex(
+            "10b5"  # push {r4, lr}
+            "83b0"  # sub sp, #12
+            "6846"  # mov r0, sp
+            "0000"  # ldr r1, [pc, #?]
+            "7944"  # add r1, pc
+            "0000"  # ldr r2, [pc, #?]
+            "7a44"  # add r2, pc
+            "0000"  # ldr r3, [pc, #?]
+            "7b44"  # add r3, pc
+            "00000000"  # bl getStaticMethodInfo
+            "0028"  # cmp r0, #0
+            "00d0"  # beq done
+            "0098"  # ldr r0, [sp, #0]
+            "0199"  # ldr r1, [sp, #4]
+            "029a"  # ldr r2, [sp, #8]
+            "0368"  # ldr r3, [r0]
+            "8e24"  # movs r4, #0x8e
+            "a400"  # lsls r4, r4, #2
+            "1c59"  # ldr r4, [r3, r4]
+            "a047"  # blx r4
+            "03b0"  # add sp, #12
+            "10bd"  # pop {r4, pc}
+        )
+    )
+    done_off = body.find(bytes.fromhex("03b010bd"))
+    beq_off = body.find(bytes.fromhex("002800d0")) + 2
+    disp = done_off - (beq_off + 4)
+    if disp < 0 or disp & 1 or disp > 254:
+        raise RuntimeError(f"offline cave beq out of range {disp}")
+    body[beq_off : beq_off + 2] = _hw(0xD000 | (disp >> 1))
+    bl_off = body.find(bytes.fromhex("00000000"))
+    body[bl_off : bl_off + 4] = _bl(OFFLINE_CAVE + bl_off, GET_STATIC_METHOD)
+    blob = body
+    if len(blob) & 3:
+        blob += b"\x00" * (4 - (len(blob) & 3))
+    pool = OFFLINE_CAVE + len(blob)
+    strings = cls + method + sig
+    string_at = pool + 12
+    addrs = [string_at, string_at + len(cls), string_at + len(cls) + len(method)]
+    ldr_addrs = []
+    cursor = 0
+    for rt in (1, 2, 3):
+        marker = _hw(0x0000) + _hw(0x4478 | rt)
+        at = blob.find(marker, cursor)
+        if at < 0:
+            raise RuntimeError("offline cave ldr slot missing")
+        ldr_addrs.append(OFFLINE_CAVE + at)
+        cursor = at + 4
+    pool_words = bytearray()
+    for index, (ldr_addr, str_addr) in enumerate(zip(ldr_addrs, addrs)):
+        rt = index + 1
+        slot = pool + len(pool_words)
+        pc_base = (ldr_addr + 4) & ~3
+        imm = slot - pc_base
+        if imm < 0 or imm > 0x3FC or imm & 3:
+            raise RuntimeError(f"offline cave literal {imm:#x} from {ldr_addr:#x}")
+        blob[ldr_addr - OFFLINE_CAVE : ldr_addr - OFFLINE_CAVE + 2] = _hw(0x4800 | (rt << 8) | (imm >> 2))
+        add_addr = ldr_addr + 2
+        pool_words += struct.pack("<I", (str_addr - (add_addr + 4)) & 0xFFFFFFFF)
+    end = OFFLINE_CAVE + len(blob) + len(pool_words) + len(strings)
+    if end >= 0x3A45F8:
+        raise RuntimeError("offline cave spilled into the next function")
+    return blob + pool_words + strings
+
+
 def _return_imm(value: int) -> bytes:
     return _movs_imm(0, value) + _hw(0x4770)  # movs r0, #imm; bx lr
 
@@ -300,6 +409,16 @@ def patch_libhss(path: Path) -> None:
     _expect(data, START_TUTORIAL, bytes.fromhex("38b5"))
     _expect(data, RUN_TUTORIAL_TRIGGERS, bytes.fromhex("f0b5"))
     _expect(data, IS_TUTORIAL_ACTIVE, bytes.fromhex("10b5"))
+    _expect(data, PURCHASE_ITEM_SKIP_SETUP, bytes.fromhex("2ad0"))
+    _expect(data, PURCHASE_ITEM_REQUIRE_ACCOUNT, bytes.fromhex("01d1"))
+    _expect(data, PURCHASE_CURRENCY_SKIP_SETUP, bytes.fromhex("2bd0"))
+    _expect(data, PURCHASE_CURRENCY_REQUIRE_ACCOUNT, bytes.fromhex("11d0"))
+    _expect(data, ABOUT_BUTTON, bytes.fromhex("10b5041c"))
+    _expect(data, ADD_COINS, bytes.fromhex("38b5041c"))
+    _expect(data, ADD_HEARTS, bytes.fromhex("38b5041c"))
+    _expect(data, GRANT_CASH, bytes.fromhex("30b51820"))
+    _expect(data, GRANT_DIAMONDS, bytes.fromhex("30b51820"))
+    _expect(data, GRANT_XP, bytes.fromhex("30b51820"))
 
     trampoline = _server_time_trampoline()
     cave = _purchase_cave()
@@ -330,4 +449,22 @@ def patch_libhss(path: Path) -> None:
     data[START_TUTORIAL : START_TUTORIAL + 2] = _hw(0x4770)
     data[RUN_TUTORIAL_TRIGGERS : RUN_TUTORIAL_TRIGGERS + 2] = _hw(0x4770)
     data[IS_TUTORIAL_ACTIVE : IS_TUTORIAL_ACTIVE + 4] = _return_imm(0)
+    # Skip the create-account setup, then take the purchase branch anyway.
+    data[PURCHASE_ITEM_SKIP_SETUP : PURCHASE_ITEM_SKIP_SETUP + 2] = bytes.fromhex("2ae0")
+    data[PURCHASE_ITEM_REQUIRE_ACCOUNT : PURCHASE_ITEM_REQUIRE_ACCOUNT + 2] = bytes.fromhex("01e0")
+    data[PURCHASE_CURRENCY_SKIP_SETUP : PURCHASE_CURRENCY_SKIP_SETUP + 2] = bytes.fromhex("2be0")
+    data[PURCHASE_CURRENCY_REQUIRE_ACCOUNT : PURCHASE_CURRENCY_REQUIRE_ACCOUNT + 2] = bytes.fromhex("00bf")
+    menu = _offline_menu_cave()
+    data[OFFLINE_CAVE : OFFLINE_CAVE + len(menu)] = menu
+    data[ABOUT_BUTTON : ABOUT_BUTTON + 4] = _b_wide(ABOUT_BUTTON, OFFLINE_CAVE)
+    data[ADD_COINS : ADD_COINS + len(ADD_COINS_STUB)] = ADD_COINS_STUB
+    data[ADD_HEARTS : ADD_HEARTS + len(ADD_HEARTS_STUB)] = ADD_HEARTS_STUB
+    data[GRANT_CASH : GRANT_CASH + len(GRANT_CASH_STUB)] = GRANT_CASH_STUB
+    data[GRANT_DIAMONDS : GRANT_DIAMONDS + len(GRANT_DIAMONDS_STUB)] = GRANT_DIAMONDS_STUB
+    data[GRANT_XP : GRANT_XP + len(GRANT_XP_STUB)] = GRANT_XP_STUB
+    _expect(data, PURCHASE_FINISH, bytes.fromhex("20462946"))
+    if PAYOUT_EPILOGUE + len(PAYOUT_TAIL) > 0x3A4572:
+        raise RuntimeError("payout tail spilled into the next live instructions")
+    data[PAYOUT_EPILOGUE : PAYOUT_EPILOGUE + len(PAYOUT_TAIL)] = PAYOUT_TAIL
+    data[PURCHASE_FINISH : PURCHASE_FINISH + 4] = _b_wide(PURCHASE_FINISH, PAYOUT_EPILOGUE)
     path.write_bytes(data)

@@ -12,86 +12,376 @@
     return-void
 .end method
 
+.method public static showFromGame()V
+    .locals 1
+
+    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
+
+    if-eqz v0, :missing
+
+    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->show(Landroid/app/Activity;)V
+
+    :missing
+    return-void
+.end method
+
 .method public static show(Landroid/app/Activity;)V
-    .locals 4
+    .locals 6
 
-    const/16 v0, 0x8
+    new-instance v0, Landroid/app/Dialog;
 
-    new-array v0, v0, [Ljava/lang/CharSequence;
-
-    const/4 v1, 0x0
-
-    const-string v2, "Export progress (.hollywoodujson)"
-
-    aput-object v2, v0, v1
+    invoke-direct {v0, p0}, Landroid/app/Dialog;-><init>(Landroid/content/Context;)V
 
     const/4 v1, 0x1
 
+    invoke-virtual {v0, v1}, Landroid/app/Dialog;->requestWindowFeature(I)Z
+
+    move-result v1
+
+    new-instance v1, Landroid/widget/LinearLayout;
+
+    invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+
+    const/4 v2, 0x1
+
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
+
+    new-instance v2, Landroid/graphics/drawable/GradientDrawable;
+
+    invoke-direct {v2}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
+
+    const/4 v3, 0x0
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
+
+    const v3, 0xff1b6ca8
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
+
+    const/16 v3, 0x16
+
+    int-to-float v3, v3
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
+
+    const/4 v3, 0x4
+
+    const/4 v4, -0x1
+
+    invoke-virtual {v2, v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
+
+    const/16 v2, 0x1c
+
+    invoke-virtual {v1, v2, v2, v2, v2}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+
+    new-instance v2, Landroid/widget/TextView;
+
+    invoke-direct {v2, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+
+    const-string v3, "RR Mod Settings"
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    const/4 v3, -0x1
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
+
+    const/high16 v3, 0x41c00000    # 24.0f
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
+
+    const/16 v3, 0x11
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setGravity(I)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    new-instance v2, Landroid/widget/TextView;
+
+    invoke-direct {v2, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+
+    const-string v3, "Quest requirements are bypassed. Open a quest and tap it to collect."
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    const/4 v3, -0x1
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
+
+    const/high16 v3, 0x41600000    # 14.0f
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
+
+    const/16 v3, 0x11
+
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setGravity(I)V
+
+    const/16 v3, 0x10
+
+    invoke-virtual {v2, v3, v3, v3, v3}, Landroid/widget/TextView;->setPadding(IIII)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    const-string v2, "Add 10,000,000 cash"
+
+    const-string v3, "cash"
+
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v2, "Add 10,000,000 diamonds"
+
+    const-string v3, "diamonds"
+
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v2, "Add 5,000,000 XP"
+
+    const-string v3, "xp"
+
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v2, "Unlock everything"
+
+    const-string v3, "all"
+
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+
+    const-string v2, "Export progress"
+
+    const-string v3, "export"
+
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+
     const-string v2, "Import progress"
 
-    aput-object v2, v0, v1
+    const-string v3, "import"
 
-    const/4 v1, 0x2
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v2, "+1000 rings"
+    const-string v2, "Close"
 
-    aput-object v2, v0, v1
+    const-string v3, "close"
 
-    const/4 v1, 0x3
+    invoke-static {p0, v1, v0, v2, v3}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v2, "+10000 coins"
+    new-instance v2, Landroid/widget/ScrollView;
 
-    aput-object v2, v0, v1
+    invoke-direct {v2, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V
 
-    const/4 v1, 0x4
+    invoke-virtual {v2, v1}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V
 
-    const-string v2, "+500 books"
+    invoke-virtual {v0, v2}, Landroid/app/Dialog;->setContentView(Landroid/view/View;)V
 
-    aput-object v2, v0, v1
-
-    const/4 v1, 0x5
-
-    const-string v2, "+100 pencils"
-
-    aput-object v2, v0, v1
-
-    const/4 v1, 0x6
-
-    const-string v2, "+25 tickets"
-
-    aput-object v2, v0, v1
-
-    const/4 v1, 0x7
-
-    const-string v2, "+2000 XP"
-
-    aput-object v2, v0, v1
-
-    new-instance v1, Landroid/app/AlertDialog$Builder;
-
-    invoke-direct {v1, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
-
-    const-string v2, "Offline settings"
-
-    invoke-virtual {v1, v2}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
+    invoke-virtual {v0}, Landroid/app/Dialog;->getWindow()Landroid/view/Window;
 
     move-result-object v1
 
-    const-string v2, "Rings and coins are the store gems and cash. Export writes the real save files. Import closes the game so the save reloads."
+    new-instance v2, Landroid/graphics/drawable/ColorDrawable;
 
-    invoke-virtual {v1, v2}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
+    const/4 v3, 0x0
 
-    move-result-object v1
+    invoke-direct {v2, v3}, Landroid/graphics/drawable/ColorDrawable;-><init>(I)V
 
-    new-instance v2, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Click;
+    invoke-virtual {v1, v2}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
 
-    invoke-direct {v2, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Click;-><init>(Landroid/app/Activity;)V
+    const/16 v2, 0x348
 
-    invoke-virtual {v1, v0, v2}, Landroid/app/AlertDialog$Builder;->setItems([Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
+    const/16 v3, 0x384
+
+    invoke-virtual {v1, v2, v3}, Landroid/view/Window;->setLayout(II)V
+
+    invoke-virtual {v0}, Landroid/app/Dialog;->show()V
+
+    return-void
+.end method
+
+.method public static attach(Landroid/app/Activity;)V
+    .locals 6
+
+    :try_start_g
+    const-string v0, "frida-gadget"
+
+    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V
+    :try_end_g
+    .catch Ljava/lang/Throwable; {:try_start_g .. :try_end_g} :catch_g
+
+    goto :ui
+
+    :catch_g
+    :ui
+    const v0, 0x1020002
+
+    invoke-virtual {p0, v0}, Landroid/app/Activity;->findViewById(I)Landroid/view/View;
 
     move-result-object v0
 
-    invoke-virtual {v0}, Landroid/app/AlertDialog$Builder;->show()Landroid/app/AlertDialog;
+    check-cast v0, Landroid/widget/FrameLayout;
+
+    new-instance v1, Landroid/widget/TextView;
+
+    invoke-direct {v1, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+
+    const-string v2, "\u2699"
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    const/4 v2, -0x1
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextColor(I)V
+
+    const/high16 v2, 0x41c80000    # 25.0f
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
+
+    const/16 v2, 0x11
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setGravity(I)V
+
+    const/4 v2, 0x1
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setClickable(Z)V
+
+    new-instance v2, Landroid/graphics/drawable/GradientDrawable;
+
+    invoke-direct {v2}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
+
+    const/4 v3, 0x0
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
+
+    const v3, 0xff3aa0dc
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
+
+    const/16 v3, 0x12
+
+    int-to-float v3, v3
+
+    invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
+
+    const/4 v3, 0x5
+
+    const v4, -0x1
+
+    invoke-virtual {v2, v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
+
+    new-instance v2, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Gear;
+
+    invoke-direct {v2, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Gear;-><init>(Landroid/app/Activity;)V
+
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    new-instance v2, Landroid/widget/FrameLayout$LayoutParams;
+
+    const/16 v3, 0x6e
+
+    const/16 v4, 0x6e
+
+    invoke-direct {v2, v3, v4}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+
+    const/16 v3, 0x33
+
+    iput v3, v2, Landroid/widget/FrameLayout$LayoutParams;->gravity:I
+
+    const/16 v3, 0x933
+
+    iput v3, v2, Landroid/view/ViewGroup$MarginLayoutParams;->leftMargin:I
+
+    const/16 v3, 0x10c
+
+    iput v3, v2, Landroid/view/ViewGroup$MarginLayoutParams;->topMargin:I
+
+    invoke-virtual {v0, v1, v2}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    return-void
+.end method
+
+.method public static grantKind(I)V
+    .locals 1
+
+    new-instance v0, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Run;
+
+    invoke-direct {v0, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Run;-><init>(I)V
+
+    invoke-static {v0}, Lcom/pixelberrystudios/iab/BaseIabActivity;->runOnGame(Ljava/lang/Runnable;)V
+
+    return-void
+.end method
+
+.method private static row(Landroid/app/Activity;Landroid/widget/LinearLayout;Landroid/app/Dialog;Ljava/lang/String;Ljava/lang/String;)V
+    .locals 6
+
+    new-instance v0, Landroid/widget/TextView;
+
+    invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+
+    invoke-virtual {v0, p3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+
+    const v1, 0xff16324f
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
+
+    const/high16 v1, 0x41880000    # 17.0f
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextSize(F)V
+
+    const/16 v1, 0x11
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setGravity(I)V
+
+    const/4 v1, 0x1
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setClickable(Z)V
+
+    new-instance v1, Landroid/graphics/drawable/GradientDrawable;
+
+    invoke-direct {v1}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
+
+    const/4 v2, 0x0
+
+    invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
+
+    const/4 v2, -0x1
+
+    invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
+
+    const/16 v2, 0x12
+
+    int-to-float v2, v2
+
+    invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
+
+    const/16 v1, 0x12
+
+    invoke-virtual {v0, v1, v1, v1, v1}, Landroid/widget/TextView;->setPadding(IIII)V
+
+    new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
+
+    const/4 v2, -0x1
+
+    const/4 v3, -0x2
+
+    invoke-direct {v1, v2, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+
+    const/16 v2, 0xe
+
+    iput v2, v1, Landroid/view/ViewGroup$MarginLayoutParams;->topMargin:I
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setLayoutParams(Landroid/view/ViewGroup$LayoutParams;)V
+
+    new-instance v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Row;
+
+    invoke-direct {v1, p0, p2, p4}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Row;-><init>(Landroid/app/Activity;Landroid/app/Dialog;Ljava/lang/String;)V
+
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+
+    invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     return-void
 .end method
@@ -203,7 +493,7 @@
     return v0
 .end method
 
-.method private static toast(Landroid/app/Activity;Ljava/lang/String;)V
+.method public static toast(Landroid/app/Activity;Ljava/lang/String;)V
     .locals 1
 
     const/4 v0, 0x1
@@ -256,7 +546,7 @@
 
     move-result v0
 
-    if-nez v0, :done
+    if-eqz v0, :done
 
     invoke-virtual {p1}, Ljava/io/File;->isDirectory()Z
 
@@ -578,9 +868,9 @@
 
     invoke-static {}, Landroid/os/Process;->myPid()I
 
-    move-result p0
+    move-result v5
 
-    invoke-static {p0}, Landroid/os/Process;->killProcess(I)V
+    invoke-static {v5}, Landroid/os/Process;->killProcess(I)V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
