@@ -50,6 +50,11 @@ RETURN_FALSE = {
     0x3D6750: bytes.fromhex("f8b5061c"),  # ClothingLogic::isLocked
 }
 SET_LOCKED = 0x4AD860
+# Opening tutorial and the later tutorial triggers. isTutorialActive stays false
+# so a save that was mid-tutorial does not keep the campus locked.
+START_TUTORIAL = 0x400EA4
+RUN_TUTORIAL_TRIGGERS = 0x400EE0
+IS_TUTORIAL_ACTIVE = 0x3FB224
 
 CAVE = SERVER_TIME_FAIL + 18  # immediately after the 18-byte time trampoline
 
@@ -292,6 +297,9 @@ def patch_libhss(path: Path) -> None:
     _expect(data, CURRENCY_NETWORK_B, bytes.fromhex("9ee5"))
     _expect(data, CLOTHING_NETWORK_BNE, bytes.fromhex("68d1"))
     _expect(data, SET_LOCKED, bytes.fromhex("f8b5"))
+    _expect(data, START_TUTORIAL, bytes.fromhex("38b5"))
+    _expect(data, RUN_TUTORIAL_TRIGGERS, bytes.fromhex("f0b5"))
+    _expect(data, IS_TUTORIAL_ACTIVE, bytes.fromhex("10b5"))
 
     trampoline = _server_time_trampoline()
     cave = _purchase_cave()
@@ -319,4 +327,7 @@ def patch_libhss(path: Path) -> None:
     data[CURRENCY_NETWORK_BPL : CURRENCY_NETWORK_BPL + 2] = _hw(0x46C0)
     data[CURRENCY_NETWORK_B : CURRENCY_NETWORK_B + 2] = _hw(0xE7FF)
     data[CLOTHING_NETWORK_BNE : CLOTHING_NETWORK_BNE + 2] = _hw(0x46C0)
+    data[START_TUTORIAL : START_TUTORIAL + 2] = _hw(0x4770)
+    data[RUN_TUTORIAL_TRIGGERS : RUN_TUTORIAL_TRIGGERS + 2] = _hw(0x4770)
+    data[IS_TUTORIAL_ACTIVE : IS_TUTORIAL_ACTIVE + 4] = _return_imm(0)
     path.write_bytes(data)

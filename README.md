@@ -19,6 +19,7 @@ This repository does **not** contain the game. Hollywood U is copyright Pixelber
 | Level and quest locks | Store items, buildings, clothes, makeovers, classes, and campus plots no longer check level or quest requirements. Lock badges are forced off. |
 | Admissions office | Recruiting is no longer blocked by the “office is full” check. |
 | OFFLINE button | A button on the game screen opens offline settings: export, import, and grants. It sits above the game, including while the normal settings dialog is open. |
+| Skip tutorial | `startTutorial` and later tutorial triggers return immediately, and the “tutorial is active” check stays false, so a half-finished tutorial does not lock the campus. |
 | Save export and import | Export writes the real `files/`, `shared_prefs/`, and `databases/` data into a `.hollywoodujson` file. Import puts those bytes back and restarts the game. |
 
 In the game, rings are the premium currency (the code calls them hearts) and coins are cash. Books are stars.
@@ -39,7 +40,13 @@ Apktool 3.0.3 and uber-apk-signer 1.3.0 are included under `tools/`. Their licen
 python3 patcher/patch_apk.py --apk /path/to/HollywoodU-3.8.0.apk
 ```
 
-The result is `dist/Hollywood-U-3.8.0-offline.apk`. The first run creates `build/offline.keystore` and signs with it. Keep that keystore if you want later builds to install as an update instead of a different app.
+The result is `dist/Hollywood-U-3.8.0-tweaks-v4.apk`. The package version name is `3.8.0-tweaks4`. The first run creates `build/offline.keystore` and signs with it. Keep that keystore if you want later builds to install as an update instead of a different app.
+
+## GitHub build
+
+Push this repo, then create a release named `source-apk` and attach your 3.8.0 APK to that release. The game stays out of git. Run the **Build tweaked APK** workflow. It downloads that release, patches it, and uploads `Hollywood-U-3.8.0-tweaks-v4.apk` as an artifact.
+
+Every push also runs **Check patcher**, which only compiles the Python.
 
 ```bash
 python3 patcher/patch_apk.py --apk game.apk --out ~/Desktop/HollywoodU-offline.apk --java "$JAVA_HOME/bin/java"

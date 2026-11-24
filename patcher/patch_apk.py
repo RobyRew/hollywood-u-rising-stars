@@ -19,7 +19,10 @@ from hwu_native import patch_libhss
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
-VERSION_CODE = 120
+TWEAK_VERSION = 4
+VERSION_CODE = 140
+VERSION_NAME = f"3.8.0-tweaks{TWEAK_VERSION}"
+APK_NAME = f"Hollywood-U-3.8.0-tweaks-v{TWEAK_VERSION}.apk"
 
 METHOD_RE = re.compile(r"^\.method\b.*?^\.end method", re.M | re.S)
 LOCALS_RE = re.compile(r"^([ \t]*)\.locals (\d+)\s*$", re.M)
@@ -327,6 +330,7 @@ def patch_apktool_yml(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     text = re.sub(r"targetSdkVersion:\s*\d+", "targetSdkVersion: 35", text, count=1)
     text = re.sub(r"versionCode:\s*\d+", f"versionCode: {VERSION_CODE}", text, count=1)
+    text = re.sub(r"versionName:\s*\S+", f"versionName: {VERSION_NAME}", text, count=1)
     if "targetSdkVersion: 35" not in text:
         raise RuntimeError("apktool.yml has no targetSdkVersion")
     path.write_text(text, encoding="utf-8")
@@ -343,7 +347,7 @@ def patch_native_libs(decoded: Path) -> None:
     shutil.copytree(armeabi, v7a)
     for folder in (armeabi, v7a):
         patch_libhss(folder / "libHSS.so")
-    print("native: server-time bypass, store unlocked, offline rings and coins")
+    print(f"native: offline client, store, save menu, tutorial skipped, tweaks v{TWEAK_VERSION}")
 
 
 def run(command: list[str]) -> None:
@@ -354,7 +358,7 @@ def run(command: list[str]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apk", required=True, type=Path, help="path to Hollywood U 3.8.0")
-    parser.add_argument("--out", type=Path, default=ROOT / "dist" / "Hollywood-U-3.8.0-offline.apk")
+    parser.add_argument("--out", type=Path, default=ROOT / "dist" / APK_NAME)
     parser.add_argument("--java", type=Path, default=None, help="java binary; defaults to JAVA_HOME or PATH")
     parser.add_argument("--work", type=Path, default=ROOT / "build" / "decoded")
     args = parser.parse_args()
