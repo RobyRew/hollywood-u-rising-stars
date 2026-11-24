@@ -1,0 +1,2 @@
+apktool.jar is Apktool 3.0.3, Apache License 2.0, https://github.com/iBotPeaches/Apktool
+uber-apk-signer.jar is uber-apk-signer 1.3.0, Apache License 2.0, https://github.com/patrickfav/uber-apk-signer
