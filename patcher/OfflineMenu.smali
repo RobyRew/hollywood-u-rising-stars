@@ -19,13 +19,12 @@
 .method public static showFromGame()V
     .locals 1
 
-    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
+    # Called from the GL thread (OFFLINE button). show() builds a Dialog, which
+    # needs the UI thread, so post it there through nativeAction(9).
+    const/16 v0, 0x9
 
-    if-eqz v0, :missing
+    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->nativeAction(I)V
 
-    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->show(Landroid/app/Activity;)V
-
-    :missing
     return-void
 .end method
 

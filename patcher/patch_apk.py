@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
 # Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
-VERSION_PATCH = 21
+VERSION_PATCH = 22
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
 VERSION_CODE = 10000 + VERSION_PATCH

@@ -23,8 +23,9 @@ CAN_PURCHASE = 0x4015BC
 PURCHASE = 0x4015C8
 # Gives the real config reward locally, then closes the buy dialog.
 # Fits in the 34-byte purchase function and stops before rewardPurchase.
+# push/pop include r3 so the frame is 16 bytes and calls see an 8-byte aligned sp.
 LOCAL_PURCHASE = bytes.fromhex(
-    "30b504460d46dbf731fe03685b6e98472946f3f759fe2046294601f077f930bd"
+    "38b504460d46dbf731fe03685b6e98472946f3f759fe2046294601f077f938bd"
 )
 
 GET_SINGLETON = 0x3DD234
@@ -241,9 +242,9 @@ def _server_time_trampoline() -> bytes:
     blob += _bl(addr + len(blob), GET_CURRENT_MILLIS)
     blob += _mov_low(2, 0)
     blob += _mov_low(3, 1)
-    blob += _hw(0xBC01)  # pop {r0}
+    blob += _hw(0x9800)  # ldr r0, [sp]  (sp stays 8-byte aligned for the call)
     blob += _bl(addr + len(blob), ON_SERVER_TIME_SUCCESS)
-    blob += _hw(0xBD00)  # pop {pc}
+    blob += _hw(0xBD01)  # pop {r0, pc}
     if len(blob) != 18:
         raise RuntimeError(f"trampoline is {len(blob)} bytes, expected 18")
     return blob
@@ -257,7 +258,7 @@ def _offline_menu_cave() -> bytes:
     body = bytearray(
         bytes.fromhex(
             "10b5"  # push {r4, lr}
-            "83b0"  # sub sp, #12
+            "84b0"  # sub sp, #16 (8 + 16 keeps sp 8-byte aligned for JNI)
             "6846"  # mov r0, sp
             "0000"  # ldr r1, [pc, #?]
             "7944"  # add r1, pc
@@ -276,11 +277,11 @@ def _offline_menu_cave() -> bytes:
             "a400"  # lsls r4, r4, #2
             "1c59"  # ldr r4, [r3, r4]
             "a047"  # blx r4
-            "03b0"  # add sp, #12
+            "04b0"  # add sp, #16
             "10bd"  # pop {r4, pc}
         )
     )
-    done_off = body.find(bytes.fromhex("03b010bd"))
+    done_off = body.find(bytes.fromhex("04b010bd"))
     beq_off = body.find(bytes.fromhex("002800d0")) + 2
     disp = done_off - (beq_off + 4)
     if disp < 0 or disp & 1 or disp > 254:
