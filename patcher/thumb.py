@@ -177,7 +177,11 @@ class Asm:
         self.raw(0x4478 | rd)  # add rd, pc
 
     def ldr_const(self, rd: int, value: int) -> None:
-        """rd = 32-bit constant from the literal pool."""
+        """rd = 32-bit constant from the literal pool.
+
+        For plain numbers only. Code and data addresses must go through lea():
+        libHSS.so is position-independent and loads at a random base.
+        """
         entry = ("abs", value & 0xFFFFFFFF)
         if entry in self.pool:
             slot = self.pool.index(entry)

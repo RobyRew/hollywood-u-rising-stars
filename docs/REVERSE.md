@@ -57,6 +57,14 @@ Both stubs call `PlayerLogic` through the singleton at `0x3DD234` (`bl` there, t
 | pencils | `0x3E6A10` |
 | tickets | `0x3E6A30` |
 
+`libHSS.so` is the engine shared with High School Story, so it carries all six
+wallets. Hollywood U's own `HUD.ccb` has only `coinsMeter` (cash),
+`heartsMeter` (diamonds) and `ticketsMeter`; it has no stars or pencil nodes,
+and its level icon `starpower.png` is the XP level. `WorldMapState::updateGoalsButton`
+calls `HUD::showTickets(QuestLogic::isQuestCompleted(<weekly goals quest>))`, and
+the weekly goals themselves come from `Net::GoalManager` (server). The RR MOD
+tab grants cash, diamonds and XP only.
+
 The amount is a 32-bit argument in `r1`. 10,000,000 is `0x00989680`.
 
 `BaseIabActivity.startPurchaseFlow` does **not** reach those functions. It builds a Google Play payload and starts the billing UI. The Play servers for this game are gone, so a settings button that only calls `startPurchaseFlow` never adds currency.

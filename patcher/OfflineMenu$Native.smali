@@ -3,7 +3,7 @@
 .source "OfflineMenu.java"
 
 # Runs on the UI thread after a button on the native RR MOD tab. The native
-# side (rr_tab.py) has already applied tags 1-9; this shows the result and
+# side (rr_tab.py) has already applied tags 1-10; this shows the result and
 # handles the actions that need an Activity.
 
 # interfaces
@@ -38,84 +38,90 @@
 
     iget v1, p0, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Native;->b:I
 
-    const/16 v2, 0xa
+    const/16 v2, 0xb
 
-    if-ne v1, v2, :not_export
+    if-ne v1, v2, :not_11
 
     invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->beginExport(Landroid/app/Activity;)V
 
     return-void
 
-    :not_export
-    const/16 v2, 0xb
+    :not_11
+    const/16 v2, 0xc
 
-    if-ne v1, v2, :not_import
+    if-ne v1, v2, :not_12
 
     invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->beginImport(Landroid/app/Activity;)V
 
     return-void
 
-    :not_import
-    const/16 v2, 0x63
+    :not_12
+    const/16 v2, 0xd
 
-    if-ne v1, v2, :not_panel
+    if-ne v1, v2, :not_13
 
-    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->show(Landroid/app/Activity;)V
+    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->confirmReset(Landroid/app/Activity;)V
 
     return-void
 
-    :not_panel
+    :not_13
     const-string v2, "Added 10,000,000 cash (stops at 2,000,000,000)"
 
-    const/4 p0, 0x1
+    const/16 p0, 0x1
 
     if-eq v1, p0, :toast
 
     const-string v2, "Added 100,000,000 cash (stops at 2,000,000,000)"
 
-    const/4 p0, 0x2
+    const/16 p0, 0x2
 
     if-eq v1, p0, :toast
 
     const-string v2, "Added 10,000,000 diamonds (stops at 2,000,000,000)"
 
-    const/4 p0, 0x3
+    const/16 p0, 0x3
 
     if-eq v1, p0, :toast
 
     const-string v2, "Added 100,000,000 diamonds (stops at 2,000,000,000)"
 
-    const/4 p0, 0x4
+    const/16 p0, 0x4
 
     if-eq v1, p0, :toast
 
     const-string v2, "Up one level (no change at the top level)"
 
-    const/4 p0, 0x5
+    const/16 p0, 0x5
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 5,000,000 XP"
+    const-string v2, "Added 5,000,000 XP (stops at 2,000,000,000)"
 
-    const/4 p0, 0x6
+    const/16 p0, 0x6
+
+    if-eq v1, p0, :toast
+
+    const-string v2, "Top player level"
+
+    const/16 p0, 0x7
 
     if-eq v1, p0, :toast
 
     const-string v2, "Every friend and A-lister is at the top level"
 
-    const/4 p0, 0x7
+    const/16 p0, 0x8
 
     if-eq v1, p0, :toast
 
     const-string v2, "Every building is at its top upgrade level"
 
-    const/16 p0, 0x8
+    const/16 p0, 0x9
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Unlocked: +100,000,000 cash and diamonds, top player level, every friend, A-lister and building at the top level"
+    const-string v2, "Unlocked: +100,000,000 cash and diamonds, top level, every friend, A-lister and building at the top level"
 
-    const/16 p0, 0x9
+    const/16 p0, 0xa
 
     if-eq v1, p0, :toast
 

@@ -58,8 +58,8 @@ Pixelberry shut Hollywood U's servers and store listings on **10 August 2022**. 
 <td valign="top">
 
 ### ⚙️ RR MOD settings tab
-- **+10M / +100M cash**, **+10M / +100M diamonds**, **+1 level** or **+5M XP**
-- **Max** every friend, A-lister and building in one tap, or **UNLOCK ALL**
+- **+10M / +100M cash** and **diamonds**, **+1 level**, **+5M XP**, **max level**
+- **Max** every friend, A-lister and building in one tap, **UNLOCK ALL**, or **RESET** the save
 - Locked clothing, makeovers, classes, expansions and store items are open; missing art falls back to an empty sprite instead of crashing
 - **Export / import** the real save (`files/`, `shared_prefs/`, `databases/`) as a `.hollywoodujson` file
 - The first-run acceptance letter doesn't wait for a tap; the tutorial after it runs as usual
@@ -80,13 +80,13 @@ Open the game's **Settings** (Help · Settings · Alerts) and pick the fourth ta
 
 | Section | Buttons |
 | --- | --- |
-| **Currency** | `+10M CASH` · `+100M CASH` · `+10M DIAMONDS` · `+100M DIAMONDS` |
-| **Levels** | `+1 LEVEL` (exactly the XP missing to the next level) · `+5M XP` · `MAX FRIENDS` (every friend and A-lister to the top skill level) · `MAX BUILDINGS` (every building to its top upgrade level) |
-| **Save Data** | `UNLOCK ALL` (+100M cash, +100M diamonds, top player level, max friends, max buildings) · `EXPORT` · `IMPORT` |
+| **Currency & Levels** | `+10M CASH` · `+100M CASH` · `+10M DIAMONDS` · `+100M DIAMONDS` · `+1 LEVEL` (exactly the XP missing to the next level) · `+5M XP` · `MAX LEVEL` |
+| **Unlock & Save** | `MAX FRIENDS` (every friend and A-lister to the top skill level) · `MAX BUILDINGS` (every building to its top upgrade level) · `UNLOCK ALL` · `EXPORT` · `IMPORT` · `RESET` |
 
-Cash, diamonds and XP stop at **2,000,000,000**, so a counter never wraps past the 32-bit limit.
-
-There is no floating overlay button. The **OFFLINE** button on the Settings tab opens the same actions as a plain list.
+- **UNLOCK ALL** adds 100M cash and 100M diamonds, sets the top player level and maxes every friend, A-lister and building.
+- **RESET** asks first, then deletes the save on the phone and starts a new game.
+- Every grant stops at **2,000,000,000**, so no counter wraps past the 32-bit limit.
+- The Settings tab's **BACKUP SAVE** button starts an export. There are no floating buttons or Android pop-ups.
 
 ---
 
@@ -96,10 +96,10 @@ There is no floating overlay button. The **OFFLINE** button on the Settings tab 
 2. Play Protect will say it doesn't know the developer — that's the mod's own signing key. Choose **Install anyway**.
 3. Open the game. The campus and everything shipped inside the APK runs from the phone.
 
-Every release from 1.0.21 on is signed with the same key, so a new release installs over the old one and keeps your save.
+Every release from 1.0.0 on is signed with the same key, so a new release installs over the old one and keeps your save.
 
 > [!IMPORTANT]
-> **Moving from 1.0.20:** 1.0.20 was signed with a key that no longer exists, so Android won't update it in place. In 1.0.20 tap the blue gear → **Export progress**, uninstall, install the new build, then Settings → **RR MOD** → **IMPORT**. (`adb restore` refuses data across signing keys, so use the export.)
+> **Coming from a build before 1.0.0** (the old "Fully Unlocked" 1.0.20 was signed with a key that no longer exists): in the old build tap the blue gear → **Export progress**, uninstall it, install 1.0.0, then Settings → **RR MOD** → **IMPORT**. (`adb restore` refuses data across signing keys, so use the export.)
 
 <details>
 <summary><b>📵 Phones it can't run on</b></summary>
@@ -157,7 +157,7 @@ Every native patch checks the original bytes first, so any version other than 3.
 | **Check patcher** | every push and PR | compiles the Python |
 | **Build and release** | manual run, or a pushed `1.0.x` tag | downloads the original from the `source-apk` release, patches it, signs it with the permanent key, and publishes release `1.0.x` with the RR-Mod APK, the original APK and `SHA256SUMS.txt` |
 
-To ship a new version: bump `VERSION_PATCH`, push, then run **Build and release** (or push the matching tag, e.g. `git tag 1.0.22 && git push origin 1.0.22`).
+To ship a new version: add a `## 1.0.x` section to [CHANGELOG.md](CHANGELOG.md) with what changed, bump `VERSION_PATCH`, push, then run **Build and release** (or push the matching tag, e.g. `git tag 1.0.1 && git push origin 1.0.1`). The release note is that CHANGELOG section.
 
 The workflow needs two repo secrets, set once:
 
@@ -178,7 +178,7 @@ patcher/
 ├── rr_card.py          builds rr_mod_card.ccb and its Config.protobin title style
 ├── thumb.py            small Thumb assembler used by rr_tab.py
 ├── ModernCompat.smali  PendingIntent / registerReceiver / notification shims
-└── OfflineMenu*.smali  export/import, toasts, OFFLINE list, nativeAction bridge
+└── OfflineMenu*.smali  export / import / reset, toasts, nativeAction bridge
 docs/REVERSE.md         how the store, quest card, HUD and grants were traced
 decoded/                apktool tree of the 3.8.0 client
 tools/                  apktool, uber-apk-signer, Frida hook list

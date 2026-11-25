@@ -20,11 +20,12 @@ from rr_card import add_config_style, build_card
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
-# Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
-VERSION_PATCH = 24
+# Releases are 1.0.x. Bump only VERSION_PATCH (and add a CHANGELOG.md section).
+VERSION_PATCH = 0
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
-# 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
-VERSION_CODE = 10000 + VERSION_PATCH
+# versionCode stays above the pre-1.0.0 builds (10000 + 20..24), so 1.0.0
+# installs over them as an update: 1.0.0 -> 10100, 1.0.1 -> 10101.
+VERSION_CODE = 10100 + VERSION_PATCH
 GAME_VERSION = "3.8.0"
 # Release assets: the modded build and the untouched original side by side.
 APK_NAME = f"Hollywood-U_{GAME_VERSION}_RR-Mod_{VERSION_NAME}.apk"
@@ -156,13 +157,8 @@ def patch_smali_tree(smali_root: Path) -> None:
     shutil.copyfile(COMPAT, destination)
     for extra in (
         "OfflineMenu.smali",
-        "OfflineMenu$Click.smali",
-        "OfflineMenu$Open.smali",
-        "OfflineMenu$Gear.smali",
-        "OfflineMenu$Row.smali",
-        "OfflineMenu$Run.smali",
-        "OfflineMenu$Toggle.smali",
         "OfflineMenu$Native.smali",
+        "OfflineMenu$Reset.smali",
     ):
         shutil.copyfile(ROOT / "patcher" / extra, destination.parent / extra)
     pending = receivers = receivers4 = 0
@@ -219,45 +215,9 @@ def patch_smali_tree(smali_root: Path) -> None:
         if result_old not in source:
             raise RuntimeError("could not find onActivityResult")
         source = source.replace(result_old, result_new, 1)
-    # No floating gear: the mod settings live in the game's Settings dialog
-    # (RR MOD tab, rr_tab.py). OfflineMenu.attach is no longer called.
-    if "runOnGame" not in source:
-        source += """
-.method public static runOnGame(Ljava/lang/Runnable;)V
-    .locals 1
-
-    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
-
-    if-eqz v0, :missing
-
-    iget-object v0, v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->j:Lorg/cocos2dx/lib/Cocos2dxGLSurfaceView;
-
-    if-eqz v0, :missing
-
-    invoke-virtual {v0, p0}, Lorg/cocos2dx/lib/Cocos2dxGLSurfaceView;->queueEvent(Ljava/lang/Runnable;)V
-
-    :missing
-    return-void
-.end method
-"""
+    # No floating gear or Android panel: the mod settings live in the game's
+    # Settings dialog (RR MOD tab, rr_tab.py).
     activity.write_text(source, encoding="utf-8")
-    sponsor = smali_root / "com/pixelberrystudios/darthkitty/DKSponsorPay.smali"
-    if sponsor.is_file():
-        sponsor_text = sponsor.read_text(encoding="utf-8")
-        if "syncRr" not in sponsor_text:
-            old = ".method public static native DKSponsorPayOnChangeStatusError()V\n.end method\n"
-            new = old + """
-.method public static syncRr()V
-    .locals 0
-
-    invoke-static {}, Lcom/pixelberrystudios/darthkitty/DKSponsorPay;->DKSponsorPayOnSPBrandEngageOffersAvailable()V
-
-    return-void
-.end method
-"""
-            if old not in sponsor_text:
-                raise RuntimeError("could not find SponsorPay error native")
-            sponsor.write_text(sponsor_text.replace(old, new, 1), encoding="utf-8")
     helpshift = smali_root / "com/helpshift/bs.smali"
     if helpshift.is_file():
         text = helpshift.read_text(encoding="utf-8")
@@ -432,7 +392,7 @@ def main() -> int:
     if strings.is_file():
         import json
         table = json.loads(strings.read_text(encoding="utf-8"))
-        table["settings.about"] = "OFFLINE"
+        table["settings.about"] = "BACKUP SAVE"
         strings.write_text(json.dumps(table, ensure_ascii=False, separators=(", ", ": ")), encoding="utf-8")
     helper = args.work / "assets" / "hss.lua"
     if helper.is_file():

@@ -21,21 +21,14 @@ ARE_PRODUCTS_AVAILABLE = 0x4014D0
 HAS_PRODUCT = 0x401568
 CAN_PURCHASE = 0x4015BC
 PURCHASE = 0x4015C8
-# Gives the real config reward locally, then closes the buy dialog.
-# Fits in the 34-byte purchase function and stops before rewardPurchase.
+# purchase(): LogicManager -> StoreLogic::creditPurchase(product) (the config
+# reward), then firePurchaseCompleted. 34 bytes, stops before rewardPurchase.
 # push/pop include r3 so the frame is 16 bytes and calls see an 8-byte aligned sp.
 LOCAL_PURCHASE = bytes.fromhex(
     "38b504460d46dbf731fe03685b6e98472946f3f759fe2046294601f077f938bd"
 )
-
-GET_SINGLETON = 0x3DD234
-CREDIT_COINS = 0x3E69B4
-CREDIT_HEARTS = 0x3E69F0
-CREDIT_XP = 0x3E40E0
-CREDIT_STARS = 0x3E69D0
-CREDIT_PENCILS = 0x3E6A10
-CREDIT_TICKETS = 0x3E6A30
-FIRE_PURCHASE_COMPLETED = 0x4028D4
+# No Pixelberry account exists anymore; "has account" returns true.
+HAS_ACCOUNT = 0x40CA38
 
 # Currency tab shows "Network error" when this bit is clear, before the pack list.
 CURRENCY_NETWORK_BPL = 0x3C219C
@@ -43,27 +36,21 @@ CURRENCY_NETWORK_B = 0x3C2660
 # Clothing tab takes this branch into the same kind of error string.
 CLOTHING_NETWORK_BNE = 0x45ADA0
 
-# These bool checks gate the store cards, clothes, classes, plots, and recruiting.
-RETURN_TRUE = {
-    0x3F50B8: bytes.fromhex("38b5051c"),  # isCurrencyItemUnlocked
-    0x3F4FF8: bytes.fromhex("f0b54746"),  # isCurrencyBuildingUnlocked
-    0x3F3F34: bytes.fromhex("70b5ca6e"),  # isCurrencyClothingUnlocked
-    0x3D6834: bytes.fromhex("10b5041c"),  # isClothingUnlocked
-    0x3CD95C: bytes.fromhex("10b50ff0"),  # isMakeoverUnlocked
+# Store and content gates that return true (unlocked).
+UNLOCK_TRUE = {
+    0x3F50B8: bytes.fromhex("38b5051c"),  # StoreLogic::isCurrencyItemUnlocked
+    0x3F4FF8: bytes.fromhex("f0b54746"),  # StoreLogic::isCurrencyBuildingUnlocked
+    0x3F3F34: bytes.fromhex("70b5ca6e"),  # StoreLogic::isCurrencyClothingUnlocked
+    0x3F3FD0: None,                       # store card "Unlocks with Quest ..." (the quest still runs)
+    0x3D6834: bytes.fromhex("10b5041c"),  # ClothingLogic::isClothingUnlocked
+    0x3CD95C: bytes.fromhex("10b50ff0"),  # CharacterLogic::isMakeoverUnlocked
     0x3D8E04: bytes.fromhex("f8b5061c"),  # EducationLogic::isUnlocked
     0x3DB544: bytes.fromhex("10b5041c"),  # ExpansionLogic::isUnlocked
-    0x3ECC58: bytes.fromhex("70b5131c"),  # QuestLogic::meetsPassiveCompletionRequirements
-    0x3E7928: bytes.fromhex("f0b55746"),  # QuestLogic::doesCharacterMeetRequirement
 }
-RETURN_FALSE = {
-    0x3D6750: bytes.fromhex("f8b5061c"),  # ClothingLogic::isLocked
-}
-SET_LOCKED = 0x4AD860
-# Opening tutorial and the later tutorial triggers. isTutorialActive stays false
-# so a save that was mid-tutorial does not keep the campus locked.
-START_TUTORIAL = 0x400EA4
-RUN_TUTORIAL_TRIGGERS = 0x400EE0
-IS_TUTORIAL_ACTIVE = 0x3FB224
+CLOTHING_IS_LOCKED = 0x3D6750             # ClothingLogic::isLocked -> false
+# Quest predicates (meetsPassiveCompletionRequirements 0x3ECC58,
+# doesCharacterMeetRequirement 0x3E7928) are left alone: quests keep the game's rules.
+
 # Buying with no Pixelberry account used to call the dead create-account server
 # and show "Could not make purchase because an account could not be created."
 PURCHASE_ITEM_SKIP_SETUP = 0x3BF686
@@ -78,7 +65,9 @@ PREPURCHASE_BUY = 0x3C083A
 # bit requires a placed PARTY building (type 10). That branch returns true.
 CAN_PURCHASE_CHARACTER_PARTY = 0x3CD85C
 CAN_PURCHASE_CHARACTER_RETURN = 0x3CD8AC
-HAS_CREDITED_BUILDING = 0x3F4878
+# Requirement failures inside a real product (level, quest, clothing) do not
+# block the credit. A missing product still returns 2 and is not granted.
+PRODUCT_REQUIREMENT_FAILS = (0x3F4EC8, 0x3F4EEA, 0x3F4EFA)
 # PlayerLogic::credit tells listeners, and the sound listener calls into Java
 # audio. That JNI FindClass faults (SIGBUS) and kills the process after a buy.
 CURRENCY_EARNED_SOUND = 0x41B074
@@ -88,7 +77,8 @@ CREDIT_PURCHASE_SOUND = 0x3F54FC
 EMIT_TELEMETRY = 0x42D7F0
 # Sale-date checks call Java and abort the process. Cards stay visible.
 CURRENCY_ITEM_VISIBLE = 0x3F50D4
-# LeanPlum track calls Java and aborts the process. The purchase is already credited.
+# LeanPlum track calls Java and aborts the process. Each overload returns at
+# its first instruction; rr_tab uses the dead bodies for caves.
 LEANPLUM_TRACK = (
     0x369738,
     0x3697A0,
@@ -100,42 +90,15 @@ LEANPLUM_TRACK = (
 # The reward cinematic draws a label through Java and aborts. The items are
 # already credited. Skip the scene and let the store close.
 POST_PURCHASE_SCENE = 0x3C1B5E
-# The settings gear is skipped unless a progress bit is set. That bit stays
-# clear when the tutorial never runs, so the gear has to be added anyway,
-# and the rest of the HUD icons still have to be added after it.
-SETTINGS_ICON_SKIP = 0x38CD00
-SETTINGS_ICON_RETURN = 0x38CE20
+# SettingsCard::aboutButtonCallback (the "BACKUP SAVE" button) -> OFFLINE_CAVE,
+# which calls OfflineMenu.showFromGame() through JNI.
 ABOUT_BUTTON = 0x49E87C
-# The + buttons on cash and diamonds. Each tap grants currency directly.
-ADD_COINS = 0x475C6C
-ADD_HEARTS = 0x475D4C
-# 10000000 coins / diamonds. Null-checks the player, then credits. Disassembler-checked.
-ADD_COINS_STUB = bytes.fromhex("10b567f7e1fa002807d003689b6c9847002802d0014970f797fe10bd80969800")
-ADD_HEARTS_STUB = bytes.fromhex("10b567f771fa002807d003689b6c9847002802d0014970f745fe10bd80969800")
-# Public JNI voids the settings screen calls on the game thread.
-# DKSponsorPayOnChangeStatusCloseFinished / CloseAborted / Error.
-GRANT_CASH = 0x36A7F8
-GRANT_DIAMONDS = 0x36A850
-GRANT_XP = 0x36A8A8
-GRANT_CASH_STUB = bytes.fromhex("10b572f01bfd002807d003689b6c9847002802d001497cf0d1f810bd80969800")
-GRANT_DIAMONDS_STUB = bytes.fromhex("10b572f0effc002807d003689b6c9847002802d001497cf0c3f810bd80969800")
-GRANT_XP_STUB = bytes.fromhex("10b572f0c3fc002807d003689b6c9847002802d0014979f00ffc10bd404b4c00")
-PAYOUT_TAIL = bytes.fromhex(
-    "38f078fe03689b6c98470646064942f031fa3046054942f04bfa"
-    "204629465ef0b9f901b0f0bd00bf8096980080969800"
-)
 OFFLINE_CAVE = 0x3A44C0
 GET_STATIC_METHOD = 0x35FD98
-# Every finished store purchase lands here. The tail also pays 10000000 cash
-# and 10000000 diamonds, so a bundle with no plain product id still pays.
-PURCHASE_FINISH = 0x3A44AA
-PAYOUT_EPILOGUE = 0x3A4540
 
 # Config::loadConfigFile: beq over the signature check, and the parse it skips to.
 CONFIG_SIG_BRANCH = 0x37EFE2
 CONFIG_PARSE = 0x37F096
-
-CAVE = SERVER_TIME_FAIL + 18  # immediately after the 18-byte time trampoline
 
 EXPECTED = {
     SERVER_TIME_FAIL: bytes.fromhex("f0b55646"),
@@ -143,6 +106,23 @@ EXPECTED = {
     HAS_PRODUCT: bytes.fromhex("f8b54646"),
     CAN_PURCHASE: bytes.fromhex("08b560f7"),
     PURCHASE: bytes.fromhex("f8b5071c"),
+    CLOTHING_IS_LOCKED: bytes.fromhex("f8b5061c"),
+    CURRENCY_NETWORK_BPL: bytes.fromhex("00d5"),
+    CURRENCY_NETWORK_B: bytes.fromhex("9ee5"),
+    CLOTHING_NETWORK_BNE: bytes.fromhex("68d1"),
+    PURCHASE_ITEM_SKIP_SETUP: bytes.fromhex("2ad0"),
+    PURCHASE_ITEM_REQUIRE_ACCOUNT: bytes.fromhex("01d1"),
+    PURCHASE_CURRENCY_SKIP_SETUP: bytes.fromhex("2bd0"),
+    PURCHASE_CURRENCY_REQUIRE_ACCOUNT: bytes.fromhex("11d0"),
+    PREPURCHASE_ACCOUNT_GATE: bytes.fromhex("1cf029fd"),
+    CAN_PURCHASE_CHARACTER_PARTY: bytes.fromhex("20690368"),
+    CURRENCY_EARNED_SOUND: bytes.fromhex("38b5"),
+    CREDIT_PURCHASE_SOUND: bytes.fromhex("25f000fd"),
+    EMIT_TELEMETRY: bytes.fromhex("10b5"),
+    CURRENCY_ITEM_VISIBLE: bytes.fromhex("f0b54546"),
+    POST_PURCHASE_SCENE: bytes.fromhex("fff78dfd"),
+    ABOUT_BUTTON: bytes.fromhex("10b5041c"),
+    CONFIG_SIG_BRANCH: bytes.fromhex("58d0"),
 }
 
 
@@ -188,44 +168,6 @@ def _mov_low(dst: int, src: int) -> bytes:
 
 def _movs_imm(reg: int, imm: int) -> bytes:
     return _hw(0x2000 | (reg << 8) | imm)
-
-
-def _cmp_imm(reg: int, imm: int) -> bytes:
-    return _hw(0x2800 | (reg << 8) | imm)
-
-
-def _add_imm(reg: int, imm: int) -> bytes:
-    return _hw(0x3000 | (reg << 8) | imm)
-
-
-def _sub_imm(reg: int, imm: int) -> bytes:
-    return _hw(0x3800 | (reg << 8) | imm)
-
-
-def _ldrb(dst: int, base: int, imm: int) -> bytes:
-    return _hw(0x7800 | (imm << 6) | (base << 3) | dst)
-
-
-def _ldr_imm(dst: int, base: int, byte_off: int) -> bytes:
-    if byte_off % 4:
-        raise ValueError(byte_off)
-    return _hw(0x6800 | ((byte_off // 4) << 6) | (base << 3) | dst)
-
-
-def _adds_reg(dst: int, left: int, right: int) -> bytes:
-    return _hw(0x1800 | (right << 6) | (left << 3) | dst)
-
-
-def _muls(dst: int, multiplier: int) -> bytes:
-    return _hw(0x4340 | (multiplier << 3) | dst)
-
-
-def _b_cond(src: int, cond: int, dst: int) -> bytes:
-    offset = dst - (src + 4)
-    if offset % 2 or not (-256 <= offset <= 254):
-        raise ValueError(f"short branch {src:#x} -> {dst:#x} ({offset})")
-    imm8 = (offset >> 1) & 0xFF
-    return _hw(0xD000 | (cond << 8) | imm8)
 
 
 def _b_short(src: int, dst: int) -> bytes:
@@ -339,47 +281,22 @@ def patch_libhss(path: Path) -> None:
     data = bytearray(path.read_bytes())
     for addr, expected in EXPECTED.items():
         _expect(data, addr, expected)
-    for addr, expected in {**RETURN_TRUE, **RETURN_FALSE}.items():
-        _expect(data, addr, expected)
-    _expect(data, CURRENCY_NETWORK_BPL, bytes.fromhex("00d5"))
-    _expect(data, CURRENCY_NETWORK_B, bytes.fromhex("9ee5"))
-    _expect(data, CLOTHING_NETWORK_BNE, bytes.fromhex("68d1"))
-    _expect(data, SET_LOCKED, bytes.fromhex("f8b5"))
-    _expect(data, START_TUTORIAL, bytes.fromhex("38b5"))
-    _expect(data, RUN_TUTORIAL_TRIGGERS, bytes.fromhex("f0b5"))
-    _expect(data, IS_TUTORIAL_ACTIVE, bytes.fromhex("10b5"))
-    _expect(data, PURCHASE_ITEM_SKIP_SETUP, bytes.fromhex("2ad0"))
-    _expect(data, PURCHASE_ITEM_REQUIRE_ACCOUNT, bytes.fromhex("01d1"))
-    _expect(data, PURCHASE_CURRENCY_SKIP_SETUP, bytes.fromhex("2bd0"))
-    _expect(data, PURCHASE_CURRENCY_REQUIRE_ACCOUNT, bytes.fromhex("11d0"))
-    _expect(data, ABOUT_BUTTON, bytes.fromhex("10b5041c"))
-    _expect(data, ADD_COINS, bytes.fromhex("38b5041c"))
-    _expect(data, ADD_HEARTS, bytes.fromhex("38b5041c"))
-    _expect(data, GRANT_CASH, bytes.fromhex("30b51820"))
-    _expect(data, GRANT_DIAMONDS, bytes.fromhex("30b51820"))
-    _expect(data, GRANT_XP, bytes.fromhex("30b51820"))
+    for addr, expected in UNLOCK_TRUE.items():
+        if expected is not None:
+            _expect(data, addr, expected)
 
+    # Offline wall: the dead server-time call uses the phone clock.
     trampoline = _server_time_trampoline()
     data[SERVER_TIME_FAIL : SERVER_TIME_FAIL + len(trampoline)] = trampoline
-    # CAVE..0x3A44B6 held a product-id parser that nothing branched to after
-    # purchase() moved to the game's own creditPurchase. rr_tab reuses it.
-    locked_cave = 0x3A44B6
-    stub = _movs_imm(1, 0) + bytes(data[SET_LOCKED : SET_LOCKED + 4]) + _b_wide(locked_cave + 6, SET_LOCKED + 4)
-    if locked_cave + len(stub) >= 0x3A45F8:
-        raise RuntimeError("lock stub spilled into the next function")
-    data[locked_cave : locked_cave + len(stub)] = stub
-    if locked_cave != 0x3A44B6:
-        raise RuntimeError(f"lock stub moved to {locked_cave:#x}")
 
+    # Store: products are always available and pay out locally.
     data[ARE_PRODUCTS_AVAILABLE : ARE_PRODUCTS_AVAILABLE + 4] = _return_imm(1)
     data[HAS_PRODUCT : HAS_PRODUCT + 4] = _return_imm(1)
     data[CAN_PURCHASE : CAN_PURCHASE + 4] = _return_imm(1)
     if len(LOCAL_PURCHASE) > 34:
         raise RuntimeError("local purchase stub does not fit")
     data[PURCHASE : PURCHASE + len(LOCAL_PURCHASE)] = LOCAL_PURCHASE
-    # Store cards for buildings and clothes, including Club VIP.
-    data[0x3F4FF8 : 0x3F4FF8 + 4] = _return_imm(1)
-    data[0x3F3F34 : 0x3F3F34 + 4] = _return_imm(1)
+    data[HAS_ACCOUNT : HAS_ACCOUNT + 4] = _return_imm(1)
     # Fall through into the real currency list instead of the network error.
     data[CURRENCY_NETWORK_BPL : CURRENCY_NETWORK_BPL + 2] = _hw(0x46C0)
     data[CURRENCY_NETWORK_B : CURRENCY_NETWORK_B + 2] = _hw(0xE7FF)
@@ -389,60 +306,38 @@ def patch_libhss(path: Path) -> None:
     data[PURCHASE_ITEM_REQUIRE_ACCOUNT : PURCHASE_ITEM_REQUIRE_ACCOUNT + 2] = bytes.fromhex("01e0")
     data[PURCHASE_CURRENCY_SKIP_SETUP : PURCHASE_CURRENCY_SKIP_SETUP + 2] = bytes.fromhex("2be0")
     data[PURCHASE_CURRENCY_REQUIRE_ACCOUNT : PURCHASE_CURRENCY_REQUIRE_ACCOUNT + 2] = bytes.fromhex("00bf")
-    menu = _offline_menu_cave()
-    data[OFFLINE_CAVE : OFFLINE_CAVE + len(menu)] = menu
-    menu_class = OFFLINE_CAVE + menu.index(b"com/pixelberrystudios/hwuandroid/OfflineMenu\x00")
-    data[ABOUT_BUTTON : ABOUT_BUTTON + 4] = _b_wide(ABOUT_BUTTON, OFFLINE_CAVE)
-    data[GRANT_CASH : GRANT_CASH + len(GRANT_CASH_STUB)] = GRANT_CASH_STUB
-    data[GRANT_DIAMONDS : GRANT_DIAMONDS + len(GRANT_DIAMONDS_STUB)] = GRANT_DIAMONDS_STUB
-    data[GRANT_XP : GRANT_XP + len(GRANT_XP_STUB)] = GRANT_XP_STUB
-    # No Pixelberry account exists anymore. Pretending one does skips the
-    # "could not create an account" dialog and lets the buy continue.
-    data[0x40CA38 : 0x40CA38 + 4] = _return_imm(1)
-    _expect(data, PREPURCHASE_ACCOUNT_GATE, bytes.fromhex("1cf029fd"))
-    gate = _b_short(PREPURCHASE_ACCOUNT_GATE, PREPURCHASE_BUY)
-    data[PREPURCHASE_ACCOUNT_GATE : PREPURCHASE_ACCOUNT_GATE + 2] = gate
+    data[PREPURCHASE_ACCOUNT_GATE : PREPURCHASE_ACCOUNT_GATE + 2] = _b_short(PREPURCHASE_ACCOUNT_GATE, PREPURCHASE_BUY)
     # Club VIP friends: the party-building branch of canPurchaseCharacterType
     # returns true. Level-gated characters still use the real level check.
-    # The building itself stays a real purchase so party benefits have a building.
-    _expect(data, CAN_PURCHASE_CHARACTER_PARTY, bytes.fromhex("20690368"))
     party_ok = _movs_imm(5, 1) + _b_short(CAN_PURCHASE_CHARACTER_PARTY + 2, CAN_PURCHASE_CHARACTER_RETURN)
     data[CAN_PURCHASE_CHARACTER_PARTY : CAN_PURCHASE_CHARACTER_PARTY + len(party_ok)] = party_ok
-    # A previous build pretended PARTY was already owned. That hid the building
-    # and did not put one in the save. Ownership is the real check again.
-    data[HAS_CREDITED_BUILDING : HAS_CREDITED_BUILDING + 4] = bytes.fromhex("f8b5006a")
-    # The buy already added the currency. Skip the sound that crashes the process.
-    _expect(data, CURRENCY_EARNED_SOUND, bytes.fromhex("38b5"))
+    for addr in PRODUCT_REQUIREMENT_FAILS:
+        data[addr : addr + 2] = _movs_imm(0, 0)
+    # Java calls that abort the process after a buy are skipped.
     data[CURRENCY_EARNED_SOUND : CURRENCY_EARNED_SOUND + 2] = _hw(0x4770)
-    _expect(data, CREDIT_PURCHASE_SOUND, bytes.fromhex("25f000fd"))
     data[CREDIT_PURCHASE_SOUND : CREDIT_PURCHASE_SOUND + 4] = bytes.fromhex("00bf00bf")
-    _expect(data, EMIT_TELEMETRY, bytes.fromhex("10b5"))
     data[EMIT_TELEMETRY : EMIT_TELEMETRY + 2] = _hw(0x4770)
-    _expect(data, CURRENCY_ITEM_VISIBLE, bytes.fromhex("f0b54546"))
     data[CURRENCY_ITEM_VISIBLE : CURRENCY_ITEM_VISIBLE + 4] = _return_imm(1)
     for addr in LEANPLUM_TRACK:
         data[addr : addr + 2] = _hw(0x4770)
-    _expect(data, POST_PURCHASE_SCENE, bytes.fromhex("fff78dfd"))
     data[POST_PURCHASE_SCENE : POST_PURCHASE_SCENE + 4] = bytes.fromhex("00bf00bf")
-    # "Unlocks with Quest ..." is only the store card. The quest itself still runs.
-    data[0x3F3FD0 : 0x3F3FD0 + 4] = _return_imm(1)
-    # Requirement failures inside a real product (level, quest, clothing) should
-    # not block the credit. A missing product still returns 2 and is not granted.
-    data[0x3F4EC8 : 0x3F4EC8 + 2] = _movs_imm(0, 0)
-    data[0x3F4EEA : 0x3F4EEA + 2] = _movs_imm(0, 0)
-    data[0x3F4EFA : 0x3F4EFA + 2] = _movs_imm(0, 0)
+
+    # Locked content: store items, clothing, makeovers, classes, expansions.
+    # Art the APK never shipped is covered by rr_tab's CCSprite guard.
+    for addr in UNLOCK_TRUE:
+        data[addr : addr + 4] = _return_imm(1)
+    data[CLOTHING_IS_LOCKED : CLOTHING_IS_LOCKED + 4] = _return_imm(0)
+
     # Config::loadConfigFile checks config.protobin.sig (RSA) whenever the path
     # contains "config.protobin" (strstr) and drops the config on a mismatch.
     # rr_card adds a style entry to config.protobin, so the branch that skips
     # the check is taken always.
-    _expect(data, CONFIG_SIG_BRANCH, bytes.fromhex("58d0"))
     data[CONFIG_SIG_BRANCH : CONFIG_SIG_BRANCH + 2] = _b_short(CONFIG_SIG_BRANCH, CONFIG_PARSE)
-    # Locked content opens for good: store items, clothing, makeovers, classes
-    # and expansions. Quest predicates in RETURN_TRUE stay on the game's rules.
-    # Art the APK never shipped is covered by rr_tab's CCSprite guard.
-    for addr in (0x3F50B8, 0x3D6834, 0x3CD95C, 0x3D8E04, 0x3DB544):
-        data[addr : addr + 4] = _return_imm(1)
-    data[0x3D6750 : 0x3D6750 + 4] = _return_imm(0)  # ClothingLogic::isLocked
-    # RR MOD tab in the game's Settings dialog. See rr_tab.py.
+
+    # BACKUP SAVE button and the RR MOD tab.
+    menu = _offline_menu_cave()
+    data[OFFLINE_CAVE : OFFLINE_CAVE + len(menu)] = menu
+    menu_class = OFFLINE_CAVE + menu.index(b"com/pixelberrystudios/hwuandroid/OfflineMenu\x00")
+    data[ABOUT_BUTTON : ABOUT_BUTTON + 4] = _b_wide(ABOUT_BUTTON, OFFLINE_CAVE)
     rr_tab.install(data, menu_class, OFFLINE_CAVE + len(menu))
     path.write_bytes(data)

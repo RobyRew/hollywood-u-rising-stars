@@ -2,9 +2,9 @@
 
 The game's .ccb files are darthkitty.Proto.CcbNode protobufs. The RR card is
 made from android_settings_card.ccb: the same SettingsCard root, the same
-three linen panels and the same three Lobster section titles, with eleven
-game buttons (4 + 4 + 3) in place of music, effects, privacy, about and
-sign in. Every button calls privacyPolicyButtonCallback and carries a tag that
+linen panels and the same Lobster section titles, with thirteen game buttons
+(4 + 3 + 3 + 3) in place of music, effects, privacy, about and sign in. Two
+titled sections hold two rows each. Every button calls privacyPolicyButtonCallback and carries a tag that
 rr_tab.py maps to an action.
 """
 
@@ -17,6 +17,7 @@ NODE_CLASS = 1
 MEMBER_NAME = 7
 MEMBER_TYPE = 8
 POSITION = 9
+CONTENT_SIZE = 10
 SCALE_X = 11
 SCALE_Y = 12
 TAG = 17
@@ -41,20 +42,19 @@ ROWS = (
         (3, b"+10M\nDIAMONDS", GREEN),
         (4, b"+100M\nDIAMONDS", GREEN),
     ),
-    (
-        (5, b"+1\nLEVEL", BLUE),
-        (6, b"+5M\nXP", BLUE),
-        (7, b"MAX\nFRIENDS", BLUE),
-        (8, b"MAX\nBUILDINGS", BLUE),
-    ),
-    ((9, b"UNLOCK ALL", RED), (10, b"EXPORT", RED), (11, b"IMPORT", RED)),
+    ((5, b"+1 LEVEL", GREEN), (6, b"+5M XP", GREEN), (7, b"MAX LEVEL", GREEN)),
+    ((8, b"MAX FRIENDS", BLUE), (9, b"MAX BUILDINGS", BLUE), (10, b"UNLOCK ALL", BLUE)),
+    ((11, b"EXPORT", RED), (12, b"IMPORT", RED), (13, b"RESET", RED)),
 )
-ROW_Y = (54.0, -29.0, -112.0)
-# The linen panels span x -140..195 (centre 27.5).
+ROW_Y = (63.0, 17.0, -53.0, -99.0)
+# The linen panels span x -140..195 (centre 27.5): (x positions, button scale, label scale).
 COLUMNS = {
-    3: ((-80.5, 27.5, 135.5), (0.68, 0.68), 0.78),
+    3: ((-80.5, 27.5, 135.5), (0.68, 0.72), 0.7),
     4: ((-97.0, -14.0, 69.0, 152.0), (0.55, 0.72), 0.6),
 }
+# Two sections: (title y, panel bottom y, panel height). The third title
+# member stays in the card with an empty string (rr_tab sets it).
+SECTIONS = ((96.0, -6.0, 92.0), (-18.0, -122.0, 92.0))
 
 TITLE_MEMBERS = (b"soundTitleLabel", b"generalTitleLabel", b"accountTitleLabel")
 CARD_FILE = b"rr_mod_card.ccb"
@@ -198,6 +198,13 @@ def build_card(template: bytes) -> bytes:
             _set(label, SCALE_Y, 5, _f32(label_scale))
             _set(label, LABEL_STRING, 2, text)
             labels.append(label)
+
+    for panel, (_, bottom, height) in zip(panels, SECTIONS):
+        _set(panel, POSITION, 2, _point(-140.0, bottom))
+        _set(panel, CONTENT_SIZE, 2, _point(335.0, height))
+    for title, (title_y, _, _) in zip(titles, SECTIONS):
+        _set(title, POSITION, 2, _point(27.0, title_y))
+    panels = panels[: len(SECTIONS)]
 
     _set_children(menu, buttons)
     _set_children(label_holder, labels)

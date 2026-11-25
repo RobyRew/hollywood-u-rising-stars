@@ -9,18 +9,15 @@ CocosBuilder tag. The callback is hooked: when `this` is the RR card the tag
 selects a native action, then OfflineMenu.nativeAction(tag) runs in Java for
 the toast, export and import. Any other card falls through to the original.
 
-Tags:
-  1 cash +10,000,000        2 cash +100,000,000
-  3 diamonds +10,000,000    4 diamonds +100,000,000
-  5 +1 player level (the XP still missing to reach the next level)
-  6 XP +5,000,000
-  7 every friend and A-lister to the top skill level
-  8 every building to its top upgrade level
-  9 unlock all: +100M cash, +100M diamonds, max player level, 7 and 8
-  10 export save            11 import save
+Tags (rows top to bottom; Hollywood U's wallets are cash and diamonds):
+  1 cash +10M      2 cash +100M     3 diamonds +10M   4 diamonds +100M
+  5 +1 level       6 XP +5M         7 max level
+  8 max friends    9 max buildings  10 unlock all
+  11 export        12 import        13 reset (Java only)
 
-Every currency and XP grant stops at 2,000,000,000 (CAP), so a counter never
-reaches the 32-bit signed limit.
+Unlock all = +100M cash, +100M diamonds, max level, max friends, max buildings.
+Every grant stops at 2,000,000,000 (CAP), so a counter never reaches the
+32-bit signed limit.
 """
 
 from __future__ import annotations
@@ -50,6 +47,9 @@ XP_FOR_LEVEL = 0x3E4018           # PlayerLogic::getXPForLevel(unsigned level)
 IS_MAX_LEVEL = 0x3E4078           # PlayerLogic::isPlayerMaxLevel()
 GET_COINS = 0x3E419C              # PlayerLogic::getCoins()
 GET_HEARTS = 0x3E436C             # PlayerLogic::getHearts()
+# SponsorPay JNI callbacks hwu_native once turned into fixed 10M grants. They
+# are made to return at once; their bodies hold caves below.
+GRANT_JNI = (0x36A7F8, 0x36A850, 0x36A8A8)
 SHARED_CONFIG = 0x37F0D4          # HSS::Config::getSharedConfig(); level count at +0x58
 SPRITE_INIT_FRAME = 0x5F68C0      # cocos2d::CCSprite::initWithSpriteFrame(CCSpriteFrame*)
 SPRITE_INIT = 0x5F5CD4            # cocos2d::CCSprite::init()
@@ -79,15 +79,15 @@ INIT_CAVE_END = 0x3A45F8             # after the OFFLINE menu cave
 CHAR_CAVE = (0x36973A, 0x3697A0)
 PLAYER_CAVE = (0x3697A2, 0x369820)
 LEVEL_CAVE = (0x369822, 0x369890)
-# Tail of the cash grant JNI stub (the 32-byte stub ends at 0x36A818).
-SPRITE_CAVE = (0x36A818, 0x36A850)
 BUILD_CAVE = (0x369892, 0x369928)
 TITLE_CAVE = (0x36992A, 0x3699A4)
 DISPATCH_CAVE = (0x3699A6, 0x369A30)
+SPRITE_CAVE = (0x36A7FA, 0x36A850)   # body of GRANT_JNI[0]
+UNLOCK_CAVE = (0x36A852, 0x36A8A8)   # body of GRANT_JNI[1]
 
 TAB_NAME = b"RR MOD"
 CARD_FILE = b"rr_mod_card.ccb"
-TITLES = (b"Currency", b"Levels", b"Save Data")
+TITLES = (b"Currency & Levels", b"Unlock & Save", b"")
 MILLION = 1_000_000
 
 
@@ -214,26 +214,32 @@ def _titles() -> bytes:
     return a.assemble()
 
 
-def _player_helpers() -> tuple[bytes, dict[str, int]]:
-    """coins(r1) / hearts(r1) / xp(r1): credit at most CAP - current."""
+# Cash is "coins" and diamonds are "hearts" inside the game.
+WALLETS = (
+    ("coins", GET_COINS, CREDIT_COINS),
+    ("hearts", GET_HEARTS, CREDIT_HEARTS),
+    ("xp", GET_XP, CREDIT_XP),
+)
+
+
+def _player_helpers(player: int) -> tuple[bytes, dict[str, int]]:
+    """<wallet>(r1 = amount): credit at most CAP minus the current value."""
     a = Asm(PLAYER_CAVE[0])
-    for name, getter, credit in (
-        ("coins", GET_COINS, CREDIT_COINS),
-        ("hearts", GET_HEARTS, CREDIT_HEARTS),
-        ("xp", GET_XP, CREDIT_XP),
-    ):
+    for name, getter, credit in WALLETS:
         a.label(name)
-        a.ldr_const(0, getter | 1)
-        a.ldr_const(2, credit | 1)
+        # PC-relative: libHSS.so is position-independent, so an absolute
+        # address literal would point outside the loaded library.
+        a.lea(0, getter | 1)
+        a.lea(2, credit | 1)
         a.b("capped")
     a.label("capped")             # r0 = getter, r1 = amount, r2 = credit function
     a.push(3, 4, 5, 6, 7, lr=True)
     a.addr(5, 0)
     a.addr(6, 1)
     a.addr(7, 2)
-    a.bl("player")
+    a.bl(player)
     a.addr(4, 0)                  # r4 = PlayerLogic
-    a.blx_reg(5)                  # current amount
+    a.blx_reg(5)                  # current value
     a.ldr_const(1, CAP)
     a.raw(0x1A09)                 # subs r1, r1, r0  (room left under the cap)
     a.bcc("le", "capped_done")
@@ -245,15 +251,8 @@ def _player_helpers() -> tuple[bytes, dict[str, int]]:
     a.blx_reg(7)
     a.label("capped_done")
     a.pop(3, 4, 5, 6, 7, pc=True)
-    a.label("player")             # r0 = PlayerLogic*; clobbers r0-r3
-    a.push(4, lr=True)
-    a.bl(LOGIC_MANAGER)
-    a.ldr(3, 0)
-    a.ldr(3, 3, LM_PLAYER_LOGIC)
-    a.blx_reg(3)
-    a.pop(4, pc=True)
     blob = a.assemble()
-    return blob, {key: a.labels[key] for key in ("coins", "hearts", "xp", "player")}
+    return blob, {name: a.labels[name] for name, _, _ in WALLETS}
 
 
 def _level_helpers(player: int, xp: int) -> tuple[bytes, dict[str, int]]:
@@ -312,45 +311,60 @@ def _sprite_guard() -> bytes:
     return a.assemble()
 
 
+# tag -> (wallet, amount) for the plain grants.
+GRANTS = {
+    1: ("coins", 10 * MILLION),
+    2: ("coins", 100 * MILLION),
+    3: ("hearts", 10 * MILLION),
+    4: ("hearts", 100 * MILLION),
+    6: ("xp", 5 * MILLION),
+}
+
+
+def _unlock_all(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int) -> bytes:
+    """+100M cash, +100M diamonds, max level, max friends, max buildings."""
+    a = Asm(UNLOCK_CAVE[0])
+    a.push(4, lr=True)
+    for wallet in ("coins", "hearts"):
+        a.ldr_const(1, 100 * MILLION)
+        a.bl(helpers[wallet])
+    a.bl(levels["max_level"])
+    a.bl(max_chars)
+    a.bl(max_builds)
+    a.pop(4, pc=True)
+    return a.assemble()
+
+
 def _dispatch(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int) -> bytes:
     """dispatch(tag in r0): run the native part of a button."""
     a = Asm(DISPATCH_CAVE[0])
     a.push(4, lr=True)
     a.addr(4, 0)
-
-    def credit(kind: str, amount: int) -> None:
-        a.ldr_const(1, amount)
-        a.bl(helpers[kind])
-
-    table = (
-        (1, lambda: credit("coins", 10 * MILLION)),
-        (2, lambda: credit("coins", 100 * MILLION)),
-        (3, lambda: credit("hearts", 10 * MILLION)),
-        (4, lambda: credit("hearts", 100 * MILLION)),
-        (5, lambda: a.bl(levels["level"])),
-        (6, lambda: credit("xp", 5 * MILLION)),
-        (7, lambda: a.bl(max_chars)),
-        (8, lambda: a.bl(max_builds)),
-    )
-    for tag, body in table:
+    for tag, (wallet, amount) in GRANTS.items():
         a.cmp_imm(4, tag)
         a.bcc("ne", f"not{tag}")
-        body()
+        a.ldr_const(1, amount)
+        a.bl(helpers[wallet])
         a.b("done")
         a.label(f"not{tag}")
-    a.cmp_imm(4, 9)
-    a.bcc("ne", "done")
-    credit("coins", 100 * MILLION)
-    credit("hearts", 100 * MILLION)
-    a.bl(levels["max_level"])
-    a.bl(max_chars)
-    a.bl(max_builds)
+    for tag, target in (
+        (5, levels["level"]),
+        (7, levels["max_level"]),
+        (8, max_chars),
+        (9, max_builds),
+        (10, UNLOCK_CAVE[0]),
+    ):
+        a.cmp_imm(4, tag)
+        a.bcc("ne", f"not{tag}")
+        a.bl(target)
+        a.b("done")
+        a.label(f"not{tag}")
     a.label("done")
     a.pop(4, pc=True)
     return a.assemble()
 
 
-def _action_cave(class_string: int) -> bytes:
+def _action_cave(class_string: int) -> tuple[bytes, int]:
     a = Asm(ACTION_CAVE[0])
     # Hook entry for privacyPolicyButtonCallback(this=r0, sender=r1).
     a.lea(2, RR_CARD)
@@ -390,7 +404,14 @@ def _action_cave(class_string: int) -> bytes:
     a.label("skip")
     a.add_sp(16)
     a.pop(4, 5, 6, pc=True)
-    return a.assemble()
+    a.label("player")             # r0 = PlayerLogic*; clobbers r0-r3
+    a.push(4, lr=True)
+    a.bl(LOGIC_MANAGER)
+    a.ldr(3, 0)
+    a.ldr(3, 3, LM_PLAYER_LOGIC)
+    a.blx_reg(3)
+    a.pop(4, pc=True)
+    return a.assemble(), a.labels["player"]
 
 
 def _init_cave(start: int) -> bytes:
@@ -437,18 +458,23 @@ def install(data: bytearray, class_string: int, init_cave_start: int) -> None:
     _expect(data, ONINIT_TAIL, bytes.fromhex("a4234946cc50"))
     _expect(data, PRIVACY_CALLBACK, bytes.fromhex("10b5041c"))
 
+    for entry in GRANT_JNI:
+        _expect(data, entry, bytes.fromhex("30b5"))
+        data[entry : entry + 2] = bytes.fromhex("7047")  # bx lr
+    action, player = _action_cave(class_string)
+    _put(data, ACTION_CAVE, action, "action cave")
+    helpers_blob, helpers = _player_helpers(player)
+    _put(data, PLAYER_CAVE, helpers_blob, "player helpers")
+    levels_blob, levels = _level_helpers(player, helpers["xp"])
+    _put(data, LEVEL_CAVE, levels_blob, "level helpers")
     _put(data, CHAR_CAVE, _max_characters(), "max characters")
     _put(data, BUILD_CAVE, _max_buildings(), "max buildings")
     _put(data, TITLE_CAVE, _titles(), "section titles")
-    helpers_blob, helpers = _player_helpers()
-    _put(data, PLAYER_CAVE, helpers_blob, "player helpers")
-    levels_blob, levels = _level_helpers(helpers["player"], helpers["xp"])
-    _put(data, LEVEL_CAVE, levels_blob, "level helpers")
+    _put(data, UNLOCK_CAVE, _unlock_all(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0]), "unlock all")
     _put(data, DISPATCH_CAVE, _dispatch(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0]), "dispatcher")
     _expect(data, SPRITE_INIT_FRAME, bytes.fromhex("70b50a1c"))
     _put(data, SPRITE_CAVE, _sprite_guard(), "sprite guard")
     data[SPRITE_INIT_FRAME : SPRITE_INIT_FRAME + 4] = _b_wide(SPRITE_INIT_FRAME, SPRITE_CAVE[0])
-    _put(data, ACTION_CAVE, _action_cave(class_string), "action cave")
     start = (init_cave_start + 1) & ~1
     _put(data, (start, INIT_CAVE_END), _init_cave(start), "settings tab cave")
 

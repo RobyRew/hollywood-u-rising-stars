@@ -2,8 +2,9 @@ name: Build and release
 
 # Builds the modded APK from the original attached to the `source-apk` release,
 # signs it with the permanent key from the repo secrets, and publishes a release
-# with both APKs. The release tag is the mod version (VERSION_PATCH in
-# patcher/patch_apk.py), e.g. 1.0.21.
+# with both APKs. The release tag is the mod version (VERSION_NAME in
+# patcher/patch_apk.py, e.g. 1.0.0) and the notes are that version's section
+# of CHANGELOG.md. Release builds never pass --debuggable.
 
 on:
   workflow_dispatch:
@@ -14,7 +15,7 @@ on:
         default: true
   push:
     tags:
-      - "1.0.*"
+      - "1.*.*"
 
 permissions:
   contents: write
@@ -107,19 +108,13 @@ jobs:
           APK: ${{ steps.v.outputs.apk }}
           ORIGINAL: ${{ steps.v.outputs.original }}
         run: |
-          cat > notes.md <<NOTES
-          ## Hollywood U ${GAME} · RR Mod ${TAG}
-
-          | File | What it is |
-          | --- | --- |
-          | \`${APK}\` | the mod: offline, current Android, unlocked store, RR MOD settings tab |
-          | \`${ORIGINAL}\` | Pixelberry's untouched ${GAME} client |
-          | \`SHA256SUMS.txt\` | checksums of both |
-
-          Install the RR-Mod APK and choose **Install anyway** when Play Protect asks.
-          Every RR-Mod release is signed with the same key, so it installs over the previous one and keeps your save.
-          Coming from 1.0.20 (signed with an older key): gear → **Export progress**, uninstall, install this, then **Import progress**.
-          NOTES
+          # The release note is the CHANGELOG.md section for this version.
+          awk -v v="## ${TAG}" '$0==v{on=1;next} /^## /{on=0} on' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no '## ${TAG}' section. Add one before releasing."
+            exit 1
+          fi
+          cat notes.md
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" out/* --clobber
           else
