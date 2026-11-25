@@ -2,8 +2,8 @@
 
 The game's .ccb files are darthkitty.Proto.CcbNode protobufs. The RR card is
 made from android_settings_card.ccb: the same SettingsCard root, the same
-three linen panels and the same three Lobster section titles, with nine game
-buttons (three per section) in place of music, effects, privacy, about and
+three linen panels and the same three Lobster section titles, with eleven
+game buttons (4 + 4 + 3) in place of music, effects, privacy, about and
 sign in. Every button calls privacyPolicyButtonCallback and carries a tag that
 rr_tab.py maps to an action.
 """
@@ -33,15 +33,28 @@ BLUE = b"button_generic06_blue.png"
 RED = b"button_generic06_red.png"
 
 # (tag, label, sprite). Rows top to bottom, matching the three title labels.
+# Labels use "\n" for two lines (CCLabelBMFont splits on it).
 ROWS = (
-    ((1, b"+ CASH", GREEN), (2, b"+ DIAMONDS", GREEN), (3, b"+ XP", GREEN)),
-    ((5, b"FRIENDS", BLUE), (6, b"BUILDINGS", BLUE), (4, b"EVERYTHING", BLUE)),
-    ((7, b"EXPORT", RED), (8, b"IMPORT", RED), (9, b"MORE", RED)),
+    (
+        (1, b"+10M\nCASH", GREEN),
+        (2, b"+100M\nCASH", GREEN),
+        (3, b"+10M\nDIAMONDS", GREEN),
+        (4, b"+100M\nDIAMONDS", GREEN),
+    ),
+    (
+        (5, b"+1\nLEVEL", BLUE),
+        (6, b"+5M\nXP", BLUE),
+        (7, b"MAX\nFRIENDS", BLUE),
+        (8, b"MAX\nBUILDINGS", BLUE),
+    ),
+    ((9, b"EVERYTHING", RED), (10, b"EXPORT", RED), (11, b"IMPORT", RED)),
 )
 ROW_Y = (54.0, -29.0, -112.0)
-COLUMN_X = (-80.5, 27.5, 135.5)
-BUTTON_SCALE = 0.68
-LABEL_SCALE = 0.78
+# The linen panels span x -140..195 (centre 27.5).
+COLUMNS = {
+    3: ((-80.5, 27.5, 135.5), (0.68, 0.68), 0.78),
+    4: ((-97.0, -14.0, 69.0, 152.0), (0.55, 0.72), 0.6),
+}
 
 TITLE_MEMBERS = (b"soundTitleLabel", b"generalTitleLabel", b"accountTitleLabel")
 CARD_FILE = b"rr_mod_card.ccb"
@@ -165,12 +178,13 @@ def build_card(template: bytes) -> bytes:
 
     buttons, labels = [], []
     for row, y in zip(ROWS, ROW_Y):
-        for (tag, text, sprite), x in zip(row, COLUMN_X):
+        xs, (scale_x, scale_y), label_scale = COLUMNS[len(row)]
+        for (tag, text, sprite), x in zip(row, xs):
             button = [list(field) for field in button_template]
             _drop(button, MEMBER_NAME, MEMBER_TYPE)
             _set(button, POSITION, 2, _point(x, y))
-            _set(button, SCALE_X, 5, _f32(BUTTON_SCALE))
-            _set(button, SCALE_Y, 5, _f32(BUTTON_SCALE))
+            _set(button, SCALE_X, 5, _f32(scale_x))
+            _set(button, SCALE_Y, 5, _f32(scale_y))
             _set(button, TAG, 0, tag)
             for number in (SPRITE_NORMAL, SPRITE_SELECTED, SPRITE_DISABLED):
                 _set(button, number, 2, sprite)
@@ -180,8 +194,8 @@ def build_card(template: bytes) -> bytes:
             label = [list(field) for field in label_template]
             _drop(label, MEMBER_NAME, MEMBER_TYPE)
             _set(label, POSITION, 2, _point(x, y + 1.0))
-            _set(label, SCALE_X, 5, _f32(LABEL_SCALE))
-            _set(label, SCALE_Y, 5, _f32(LABEL_SCALE))
+            _set(label, SCALE_X, 5, _f32(label_scale))
+            _set(label, SCALE_Y, 5, _f32(label_scale))
             _set(label, LABEL_STRING, 2, text)
             labels.append(label)
 

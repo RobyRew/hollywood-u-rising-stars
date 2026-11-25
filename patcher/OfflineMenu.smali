@@ -20,8 +20,8 @@
     .locals 1
 
     # Called from the GL thread (OFFLINE button). show() builds a Dialog, which
-    # needs the UI thread, so post it there through nativeAction(9).
-    const/16 v0, 0x9
+    # needs the UI thread, so post it there through nativeAction(99).
+    const/16 v0, 0x63
 
     invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->nativeAction(I)V
 

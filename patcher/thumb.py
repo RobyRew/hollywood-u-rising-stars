@@ -176,6 +176,16 @@ class Asm:
         self._emit("ldrlit", 2, rd, slot)
         self.raw(0x4478 | rd)  # add rd, pc
 
+    def ldr_const(self, rd: int, value: int) -> None:
+        """rd = 32-bit constant from the literal pool."""
+        entry = ("abs", value & 0xFFFFFFFF)
+        if entry in self.pool:
+            slot = self.pool.index(entry)
+        else:
+            slot = len(self.pool)
+            self.pool.append(entry)
+        self._emit("ldrlit", 2, rd, slot)
+
     def string(self, name: str, text: bytes) -> str:
         key = f"str:{name}"
         self.strings[key] = text if text.endswith(b"\x00") else text + b"\x00"
@@ -223,6 +233,9 @@ class Asm:
                 raise AssertionError(kind)
         out += b"\x00" * (pool_at - code_end)
         for kind, value in self.pool:
+            if kind == "abs":
+                out += struct.pack("<I", value & 0xFFFFFFFF)
+                continue
             target, add_at = value
             out += struct.pack("<I", (resolve(target) - (add_at + 4)) & 0xFFFFFFFF)
         for text in self.strings.values():

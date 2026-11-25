@@ -57,8 +57,9 @@ Pixelberry shut Hollywood U's servers and store listings on **10 August 2022**. 
 </td>
 <td valign="top">
 
-### ⚙️ RR Mod settings
-- **+10,000,000 cash**, **+10,000,000 diamonds**, **+5,000,000 XP**, or all three at once
+### ⚙️ RR MOD settings tab
+- **+10M / +100M cash**, **+10M / +100M diamonds**, **+1 level** or **+5M XP**
+- **Max** every friend, A-lister and building in one tap
 - **Export / import** the real save (`files/`, `shared_prefs/`, `databases/`) as a `.hollywoodujson` file
 - The first-run acceptance letter doesn't wait for a tap; the tutorial after it runs as usual
 - Quests keep the game's own rules — nothing is marked complete for you
@@ -72,17 +73,17 @@ Pixelberry shut Hollywood U's servers and store listings on **10 August 2022**. 
 <img src="docs/images/settings-dialog.jpg" alt="The game's Settings dialog with Help, Settings and Alerts tabs" width="49%">
 </div>
 
-### 🆕 1.0.21 — a native RR MOD tab
+### ⚙️ RR MOD — inside the game's own Settings
 
-The game's own Settings dialog (Help · Settings · Alerts) gets a fourth tab, **RR MOD**, with the settings gear icon. It is a real cocos card built in the game's `.ccb` format, styled like the Settings card, with three sections of native buttons:
+Open the game's **Settings** (Help · Settings · Alerts) and pick the fourth tab, **RR MOD**, with the settings gear icon. It is a real cocos card in the game's `.ccb` format, styled like the Settings card:
 
 | Section | Buttons |
 | --- | --- |
-| **Currency** | `+ CASH` (10,000,000) · `+ DIAMONDS` (10,000,000) · `+ XP` (5,000,000) |
-| **Max Levels** | `FRIENDS` (every friend and A-lister to the top skill level) · `BUILDINGS` (every building to its top upgrade level) · `EVERYTHING` (all five) |
-| **Save Data** | `EXPORT` · `IMPORT` · `MORE` (opens the full RR Mod panel) |
+| **Currency** | `+10M CASH` · `+100M CASH` · `+10M DIAMONDS` · `+100M DIAMONDS` |
+| **Levels** | `+1 LEVEL` (exactly the XP missing to the next level) · `+5M XP` · `MAX FRIENDS` (every friend and A-lister to the top skill level) · `MAX BUILDINGS` (every building to its top upgrade level) |
+| **Save Data** | `EVERYTHING` (+100M cash, +100M diamonds, +5M XP, max friends, max buildings) · `EXPORT` · `IMPORT` |
 
-The blue floating gear and the **OFFLINE** button in Settings still open the same RR Mod panel.
+There is no floating overlay button. The **OFFLINE** button on the Settings tab opens the same actions as a plain list.
 
 ---
 
@@ -95,7 +96,7 @@ The blue floating gear and the **OFFLINE** button in Settings still open the sam
 Every release from 1.0.21 on is signed with the same key, so a new release installs over the old one and keeps your save.
 
 > [!IMPORTANT]
-> **Moving from 1.0.20 to 1.0.21+:** 1.0.20 was signed with a different key, so Android won't update it in place. Before uninstalling, tap the blue gear → **Export progress**, then install the new build and **Import progress**. (Or with a computer: `adb backup -noapk com.pixelberrystudios.hwuandroid`, reinstall, `adb restore`.)
+> **Moving from 1.0.20:** 1.0.20 was signed with a key that no longer exists, so Android won't update it in place. In 1.0.20 tap the blue gear → **Export progress**, uninstall, install the new build, then Settings → **RR MOD** → **IMPORT**. (`adb restore` refuses data across signing keys, so use the export.)
 
 <details>
 <summary><b>📵 Phones it can't run on</b></summary>
@@ -174,7 +175,7 @@ patcher/
 ├── rr_card.py          builds rr_mod_card.ccb and its Config.protobin title style
 ├── thumb.py            small Thumb assembler used by rr_tab.py
 ├── ModernCompat.smali  PendingIntent / registerReceiver / notification shims
-└── OfflineMenu*.smali  RR Mod panel, blue gear, export/import, nativeAction bridge
+└── OfflineMenu*.smali  export/import, toasts, OFFLINE list, nativeAction bridge
 docs/REVERSE.md         how the store, quest card, HUD and grants were traced
 decoded/                apktool tree of the 3.8.0 client
 tools/                  apktool, uber-apk-signer, Frida hook list

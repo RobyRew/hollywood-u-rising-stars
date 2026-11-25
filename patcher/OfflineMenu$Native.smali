@@ -3,7 +3,7 @@
 .source "OfflineMenu.java"
 
 # Runs on the UI thread after a button on the native RR MOD tab. The native
-# side (rr_tab.py) has already applied tags 1-6; this shows the result and
+# side (rr_tab.py) has already applied tags 1-9; this shows the result and
 # handles the actions that need an Activity.
 
 # interfaces
@@ -38,7 +38,7 @@
 
     iget v1, p0, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Native;->b:I
 
-    const/4 v2, 0x7
+    const/16 v2, 0xa
 
     if-ne v1, v2, :not_export
 
@@ -47,7 +47,7 @@
     return-void
 
     :not_export
-    const/16 v2, 0x8
+    const/16 v2, 0xb
 
     if-ne v1, v2, :not_import
 
@@ -56,48 +56,66 @@
     return-void
 
     :not_import
-    const/16 v2, 0x9
+    const/16 v2, 0x63
 
-    if-ne v1, v2, :not_more
+    if-ne v1, v2, :not_panel
 
     invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->show(Landroid/app/Activity;)V
 
     return-void
 
-    :not_more
+    :not_panel
     const-string v2, "Added 10,000,000 cash"
 
     const/4 p0, 0x1
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 10,000,000 diamonds"
+    const-string v2, "Added 100,000,000 cash"
 
     const/4 p0, 0x2
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 5,000,000 XP"
+    const-string v2, "Added 10,000,000 diamonds"
 
     const/4 p0, 0x3
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added cash, diamonds and XP. Friends, A-listers and buildings are at their top level."
+    const-string v2, "Added 100,000,000 diamonds"
 
     const/4 p0, 0x4
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Every friend and A-lister is at the top level"
+    const-string v2, "Up one level"
 
     const/4 p0, 0x5
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Every building is at its top upgrade level"
+    const-string v2, "Added 5,000,000 XP"
 
     const/4 p0, 0x6
+
+    if-eq v1, p0, :toast
+
+    const-string v2, "Every friend and A-lister is at the top level"
+
+    const/4 p0, 0x7
+
+    if-eq v1, p0, :toast
+
+    const-string v2, "Every building is at its top upgrade level"
+
+    const/16 p0, 0x8
+
+    if-eq v1, p0, :toast
+
+    const-string v2, "Added 100,000,000 cash, 100,000,000 diamonds and 5,000,000 XP. Friends, A-listers and buildings are at their top level."
+
+    const/16 p0, 0x9
 
     if-eq v1, p0, :toast
 

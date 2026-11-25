@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
 # Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
-VERSION_PATCH = 22
+VERSION_PATCH = 23
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
 VERSION_CODE = 10000 + VERSION_PATCH
@@ -219,12 +219,8 @@ def patch_smali_tree(smali_root: Path) -> None:
         if result_old not in source:
             raise RuntimeError("could not find onActivityResult")
         source = source.replace(result_old, result_new, 1)
-    content = "    invoke-virtual {p0, v0}, Lcom/pixelberrystudios/iab/BaseIabActivity;->setContentView(I)V\n"
-    gear = content + "\n    invoke-static {p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->attach(Landroid/app/Activity;)V\n"
-    if "OfflineMenu;->attach" not in source:
-        if content not in source:
-            raise RuntimeError("could not find setContentView")
-        source = source.replace(content, gear, 1)
+    # No floating gear: the mod settings live in the game's Settings dialog
+    # (RR MOD tab, rr_tab.py). OfflineMenu.attach is no longer called.
     if "runOnGame" not in source:
         source += """
 .method public static runOnGame(Ljava/lang/Runnable;)V

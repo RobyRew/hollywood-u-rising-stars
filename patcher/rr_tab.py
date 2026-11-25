@@ -10,11 +10,14 @@ selects a native action, then OfflineMenu.nativeAction(tag) runs in Java for
 the toast, export and import. Any other card falls through to the original.
 
 Tags:
-  1 cash +10,000,000     2 diamonds +10,000,000    3 XP +5,000,000
-  4 everything (1, 2, 3, 5, 6)
-  5 every friend and A-lister to the top skill level
-  6 every building to its top upgrade level
-  7 export save           8 import save             9 open the RR panel
+  1 cash +10,000,000        2 cash +100,000,000
+  3 diamonds +10,000,000    4 diamonds +100,000,000
+  5 +1 player level (the XP still missing to reach the next level)
+  6 XP +5,000,000
+  7 every friend and A-lister to the top skill level
+  8 every building to its top upgrade level
+  9 everything: 2, 4, 6, 7 and 8
+  10 export save            11 import save
 """
 
 from __future__ import annotations
@@ -34,9 +37,14 @@ ADD_SKILL_POINTS = 0x3CDBBC       # CharacterLogic::addSkillPoints(int id, unsig
 RB_TREE_INCREMENT = 0x720C9C      # std::_Rb_tree_increment(node)
 MAX_UPGRADE_LEVEL = 0x3C7D18      # BuildingLogic::getMaxUpgradeLevel(type)
 GET_STATIC_METHOD = 0x35FD98      # JniHelper::getStaticMethodInfo(info, cls, name, sig)
-GRANT_CASH = 0x36A7F8
-GRANT_DIAMONDS = 0x36A850
-GRANT_XP = 0x36A8A8
+LM_PLAYER_LOGIC = 0x48           # vtable slot -> PlayerLogic*
+CREDIT_COINS = 0x3E69B4           # PlayerLogic::creditCoins(unsigned)
+CREDIT_HEARTS = 0x3E69F0          # PlayerLogic::creditHearts(unsigned) (diamonds)
+CREDIT_XP = 0x3E40E0              # PlayerLogic::creditXP(unsigned)
+GET_XP = 0x3E4048                 # PlayerLogic::getXP()
+GET_PLAYER_LEVEL = 0x3E406C       # PlayerLogic::getPlayerLevel()
+XP_FOR_LEVEL = 0x3E4018           # PlayerLogic::getXPForLevel(unsigned level)
+IS_MAX_LEVEL = 0x3E4078           # PlayerLogic::isPlayerMaxLevel()
 
 # --- data -----------------------------------------------------------------
 # Writable word inside an unused GOST table; holds the RR card pointer.
@@ -60,12 +68,15 @@ INIT_CAVE_END = 0x3A45F8             # after the OFFLINE menu cave
 # (LEANPLUM_TRACK in hwu_native), so everything after that halfword is dead.
 # Callers only branch to the entries.
 CHAR_CAVE = (0x36973A, 0x3697A0)
+PLAYER_CAVE = (0x3697A2, 0x369820)
 BUILD_CAVE = (0x369892, 0x369928)
 TITLE_CAVE = (0x36992A, 0x3699A4)
+DISPATCH_CAVE = (0x3699A6, 0x369A30)
 
 TAB_NAME = b"RR MOD"
 CARD_FILE = b"rr_mod_card.ccb"
-TITLES = (b"Currency", b"Max Levels", b"Save Data")
+TITLES = (b"Currency", b"Levels", b"Save Data")
+MILLION = 1_000_000
 
 
 def _put(data: bytearray, region: tuple[int, int], blob: bytes, what: str) -> None:
@@ -191,7 +202,89 @@ def _titles() -> bytes:
     return a.assemble()
 
 
-def _action_cave(class_string: int, max_chars: int, max_builds: int) -> bytes:
+def _player_helpers() -> tuple[bytes, dict[str, int]]:
+    """credit_coins(r1) / credit_hearts(r1) / credit_xp(r1) / level_up()."""
+    a = Asm(PLAYER_CAVE[0])
+    for name, credit in (("coins", CREDIT_COINS), ("hearts", CREDIT_HEARTS), ("xp", CREDIT_XP)):
+        a.label(name)
+        a.push(4, lr=True)
+        a.addr(4, 1)              # amount
+        a.bl("player")
+        a.addr(1, 4)
+        a.bl(credit)
+        a.pop(4, pc=True)
+    a.label("level")
+    a.push(4, 5, 6, lr=True)
+    a.bl("player")
+    a.addr(4, 0)                  # r4 = PlayerLogic
+    a.bl(IS_MAX_LEVEL)
+    a.cmp_imm(0, 0)
+    a.bcc("ne", "level_done")
+    a.addr(0, 4)
+    a.bl(GET_PLAYER_LEVEL)
+    a.adds_imm(0, 1)
+    a.addr(1, 0)
+    a.addr(0, 4)
+    a.bl(XP_FOR_LEVEL)            # XP where the next level starts
+    a.addr(5, 0)
+    a.addr(0, 4)
+    a.bl(GET_XP)
+    a.raw(0x1A29)                 # subs r1, r5, r0  (XP still missing)
+    a.bcc("le", "level_done")
+    a.addr(0, 4)
+    a.bl(CREDIT_XP)
+    a.label("level_done")
+    a.pop(4, 5, 6, pc=True)
+    a.label("player")             # r0 = PlayerLogic*; clobbers r0-r3
+    a.push(4, lr=True)
+    a.bl(LOGIC_MANAGER)
+    a.ldr(3, 0)
+    a.ldr(3, 3, LM_PLAYER_LOGIC)
+    a.blx_reg(3)
+    a.pop(4, pc=True)
+    blob = a.assemble()
+    return blob, {key: a.labels[key] for key in ("coins", "hearts", "xp", "level")}
+
+
+def _dispatch(helpers: dict[str, int], max_chars: int, max_builds: int) -> bytes:
+    """dispatch(tag in r0): run the native part of a button."""
+    a = Asm(DISPATCH_CAVE[0])
+    a.push(4, lr=True)
+    a.addr(4, 0)
+
+    def credit(kind: str, amount: int) -> None:
+        a.ldr_const(1, amount)
+        a.bl(helpers[kind])
+
+    table = (
+        (1, lambda: credit("coins", 10 * MILLION)),
+        (2, lambda: credit("coins", 100 * MILLION)),
+        (3, lambda: credit("hearts", 10 * MILLION)),
+        (4, lambda: credit("hearts", 100 * MILLION)),
+        (5, lambda: a.bl(helpers["level"])),
+        (6, lambda: credit("xp", 5 * MILLION)),
+        (7, lambda: a.bl(max_chars)),
+        (8, lambda: a.bl(max_builds)),
+    )
+    for tag, body in table:
+        a.cmp_imm(4, tag)
+        a.bcc("ne", f"not{tag}")
+        body()
+        a.b("done")
+        a.label(f"not{tag}")
+    a.cmp_imm(4, 9)
+    a.bcc("ne", "done")
+    credit("coins", 100 * MILLION)
+    credit("hearts", 100 * MILLION)
+    credit("xp", 5 * MILLION)
+    a.bl(max_chars)
+    a.bl(max_builds)
+    a.label("done")
+    a.pop(4, pc=True)
+    return a.assemble()
+
+
+def _action_cave(class_string: int) -> bytes:
     a = Asm(ACTION_CAVE[0])
     # Hook entry for privacyPolicyButtonCallback(this=r0, sender=r1).
     a.lea(2, RR_CARD)
@@ -210,21 +303,7 @@ def _action_cave(class_string: int, max_chars: int, max_builds: int) -> bytes:
     a.label("action")
     a.push(4, 5, 6, lr=True)
     a.addr(4, 0)
-    for tag, calls in (
-        (1, (GRANT_CASH,)),
-        (2, (GRANT_DIAMONDS,)),
-        (3, (GRANT_XP,)),
-        (5, (max_chars,)),
-        (6, (max_builds,)),
-        (4, (GRANT_CASH, GRANT_DIAMONDS, GRANT_XP, max_chars, max_builds)),
-    ):
-        a.cmp_imm(4, tag)
-        a.bcc("ne", f"not{tag}")
-        for call in calls:
-            a.bl(call)
-        a.b("java")
-        a.label(f"not{tag}")
-    a.label("java")
+    a.bl(DISPATCH_CAVE[0])
     a.sub_sp(16)                  # JniMethodInfo {env, class, method}; 16 keeps alignment
     a.mov_sp(0)
     a.lea(1, class_string)
@@ -238,7 +317,7 @@ def _action_cave(class_string: int, max_chars: int, max_builds: int) -> bytes:
     a.ldr_sp(2, 8)
     a.addr(3, 4)
     a.ldr(5, 0)
-    a.movs(6, 0x8D)               # CallStaticVoidMethod is JNIEnv slot 141
+    a.movs(6, 0x8D)               # CallStaticVoidMethod (variadic) is JNIEnv slot 141
     a.lsls(6, 6, 2)
     a.ldr_reg(5, 5, 6)
     a.blx_reg(5)
@@ -295,8 +374,10 @@ def install(data: bytearray, class_string: int, init_cave_start: int) -> None:
     _put(data, CHAR_CAVE, _max_characters(), "max characters")
     _put(data, BUILD_CAVE, _max_buildings(), "max buildings")
     _put(data, TITLE_CAVE, _titles(), "section titles")
-    action = _action_cave(class_string, CHAR_CAVE[0], BUILD_CAVE[0])
-    _put(data, ACTION_CAVE, action, "action cave")
+    helpers_blob, helpers = _player_helpers()
+    _put(data, PLAYER_CAVE, helpers_blob, "player helpers")
+    _put(data, DISPATCH_CAVE, _dispatch(helpers, CHAR_CAVE[0], BUILD_CAVE[0]), "dispatcher")
+    _put(data, ACTION_CAVE, _action_cave(class_string), "action cave")
     start = (init_cave_start + 1) & ~1
     _put(data, (start, INIT_CAVE_END), _init_cave(start), "settings tab cave")
 
