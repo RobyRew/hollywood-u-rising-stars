@@ -65,31 +65,31 @@
     return-void
 
     :not_panel
-    const-string v2, "Added 10,000,000 cash"
+    const-string v2, "Added 10,000,000 cash (stops at 2,000,000,000)"
 
     const/4 p0, 0x1
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 100,000,000 cash"
+    const-string v2, "Added 100,000,000 cash (stops at 2,000,000,000)"
 
     const/4 p0, 0x2
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 10,000,000 diamonds"
+    const-string v2, "Added 10,000,000 diamonds (stops at 2,000,000,000)"
 
     const/4 p0, 0x3
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 100,000,000 diamonds"
+    const-string v2, "Added 100,000,000 diamonds (stops at 2,000,000,000)"
 
     const/4 p0, 0x4
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Up one level"
+    const-string v2, "Up one level (no change at the top level)"
 
     const/4 p0, 0x5
 
@@ -113,7 +113,7 @@
 
     if-eq v1, p0, :toast
 
-    const-string v2, "Added 100,000,000 cash, 100,000,000 diamonds and 5,000,000 XP. Friends, A-listers and buildings are at their top level."
+    const-string v2, "Unlocked: +100,000,000 cash and diamonds, top player level, every friend, A-lister and building at the top level"
 
     const/16 p0, 0x9
 

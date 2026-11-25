@@ -59,7 +59,8 @@ Pixelberry shut Hollywood U's servers and store listings on **10 August 2022**. 
 
 ### ⚙️ RR MOD settings tab
 - **+10M / +100M cash**, **+10M / +100M diamonds**, **+1 level** or **+5M XP**
-- **Max** every friend, A-lister and building in one tap
+- **Max** every friend, A-lister and building in one tap, or **UNLOCK ALL**
+- Locked clothing, makeovers, classes, expansions and store items are open; missing art falls back to an empty sprite instead of crashing
 - **Export / import** the real save (`files/`, `shared_prefs/`, `databases/`) as a `.hollywoodujson` file
 - The first-run acceptance letter doesn't wait for a tap; the tutorial after it runs as usual
 - Quests keep the game's own rules — nothing is marked complete for you
@@ -81,7 +82,9 @@ Open the game's **Settings** (Help · Settings · Alerts) and pick the fourth ta
 | --- | --- |
 | **Currency** | `+10M CASH` · `+100M CASH` · `+10M DIAMONDS` · `+100M DIAMONDS` |
 | **Levels** | `+1 LEVEL` (exactly the XP missing to the next level) · `+5M XP` · `MAX FRIENDS` (every friend and A-lister to the top skill level) · `MAX BUILDINGS` (every building to its top upgrade level) |
-| **Save Data** | `EVERYTHING` (+100M cash, +100M diamonds, +5M XP, max friends, max buildings) · `EXPORT` · `IMPORT` |
+| **Save Data** | `UNLOCK ALL` (+100M cash, +100M diamonds, top player level, max friends, max buildings) · `EXPORT` · `IMPORT` |
+
+Cash, diamonds and XP stop at **2,000,000,000**, so a counter never wraps past the 32-bit limit.
 
 There is no floating overlay button. The **OFFLINE** button on the Settings tab opens the same actions as a plain list.
 

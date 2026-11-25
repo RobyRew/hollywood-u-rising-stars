@@ -437,6 +437,12 @@ def patch_libhss(path: Path) -> None:
     # the check is taken always.
     _expect(data, CONFIG_SIG_BRANCH, bytes.fromhex("58d0"))
     data[CONFIG_SIG_BRANCH : CONFIG_SIG_BRANCH + 2] = _b_short(CONFIG_SIG_BRANCH, CONFIG_PARSE)
+    # Locked content opens for good: store items, clothing, makeovers, classes
+    # and expansions. Quest predicates in RETURN_TRUE stay on the game's rules.
+    # Art the APK never shipped is covered by rr_tab's CCSprite guard.
+    for addr in (0x3F50B8, 0x3D6834, 0x3CD95C, 0x3D8E04, 0x3DB544):
+        data[addr : addr + 4] = _return_imm(1)
+    data[0x3D6750 : 0x3D6750 + 4] = _return_imm(0)  # ClothingLogic::isLocked
     # RR MOD tab in the game's Settings dialog. See rr_tab.py.
     rr_tab.install(data, menu_class, OFFLINE_CAVE + len(menu))
     path.write_bytes(data)

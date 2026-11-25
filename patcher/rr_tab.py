@@ -16,8 +16,11 @@ Tags:
   6 XP +5,000,000
   7 every friend and A-lister to the top skill level
   8 every building to its top upgrade level
-  9 everything: 2, 4, 6, 7 and 8
+  9 unlock all: +100M cash, +100M diamonds, max player level, 7 and 8
   10 export save            11 import save
+
+Every currency and XP grant stops at 2,000,000,000 (CAP), so a counter never
+reaches the 32-bit signed limit.
 """
 
 from __future__ import annotations
@@ -45,6 +48,12 @@ GET_XP = 0x3E4048                 # PlayerLogic::getXP()
 GET_PLAYER_LEVEL = 0x3E406C       # PlayerLogic::getPlayerLevel()
 XP_FOR_LEVEL = 0x3E4018           # PlayerLogic::getXPForLevel(unsigned level)
 IS_MAX_LEVEL = 0x3E4078           # PlayerLogic::isPlayerMaxLevel()
+GET_COINS = 0x3E419C              # PlayerLogic::getCoins()
+GET_HEARTS = 0x3E436C             # PlayerLogic::getHearts()
+SHARED_CONFIG = 0x37F0D4          # HSS::Config::getSharedConfig(); level count at +0x58
+SPRITE_INIT_FRAME = 0x5F68C0      # cocos2d::CCSprite::initWithSpriteFrame(CCSpriteFrame*)
+SPRITE_INIT = 0x5F5CD4            # cocos2d::CCSprite::init()
+CAP = 2_000_000_000
 
 # --- data -----------------------------------------------------------------
 # Writable word inside an unused GOST table; holds the RR card pointer.
@@ -69,6 +78,9 @@ INIT_CAVE_END = 0x3A45F8             # after the OFFLINE menu cave
 # Callers only branch to the entries.
 CHAR_CAVE = (0x36973A, 0x3697A0)
 PLAYER_CAVE = (0x3697A2, 0x369820)
+LEVEL_CAVE = (0x369822, 0x369890)
+# Tail of the cash grant JNI stub (the 32-byte stub ends at 0x36A818).
+SPRITE_CAVE = (0x36A818, 0x36A850)
 BUILD_CAVE = (0x369892, 0x369928)
 TITLE_CAVE = (0x36992A, 0x3699A4)
 DISPATCH_CAVE = (0x3699A6, 0x369A30)
@@ -203,38 +215,36 @@ def _titles() -> bytes:
 
 
 def _player_helpers() -> tuple[bytes, dict[str, int]]:
-    """credit_coins(r1) / credit_hearts(r1) / credit_xp(r1) / level_up()."""
+    """coins(r1) / hearts(r1) / xp(r1): credit at most CAP - current."""
     a = Asm(PLAYER_CAVE[0])
-    for name, credit in (("coins", CREDIT_COINS), ("hearts", CREDIT_HEARTS), ("xp", CREDIT_XP)):
+    for name, getter, credit in (
+        ("coins", GET_COINS, CREDIT_COINS),
+        ("hearts", GET_HEARTS, CREDIT_HEARTS),
+        ("xp", GET_XP, CREDIT_XP),
+    ):
         a.label(name)
-        a.push(4, lr=True)
-        a.addr(4, 1)              # amount
-        a.bl("player")
-        a.addr(1, 4)
-        a.bl(credit)
-        a.pop(4, pc=True)
-    a.label("level")
-    a.push(4, 5, 6, lr=True)
+        a.ldr_const(0, getter | 1)
+        a.ldr_const(2, credit | 1)
+        a.b("capped")
+    a.label("capped")             # r0 = getter, r1 = amount, r2 = credit function
+    a.push(3, 4, 5, 6, 7, lr=True)
+    a.addr(5, 0)
+    a.addr(6, 1)
+    a.addr(7, 2)
     a.bl("player")
     a.addr(4, 0)                  # r4 = PlayerLogic
-    a.bl(IS_MAX_LEVEL)
-    a.cmp_imm(0, 0)
-    a.bcc("ne", "level_done")
+    a.blx_reg(5)                  # current amount
+    a.ldr_const(1, CAP)
+    a.raw(0x1A09)                 # subs r1, r1, r0  (room left under the cap)
+    a.bcc("le", "capped_done")
+    a.cmp(6, 1)
+    a.bcc("hi", "use_room")
+    a.addr(1, 6)
+    a.label("use_room")
     a.addr(0, 4)
-    a.bl(GET_PLAYER_LEVEL)
-    a.adds_imm(0, 1)
-    a.addr(1, 0)
-    a.addr(0, 4)
-    a.bl(XP_FOR_LEVEL)            # XP where the next level starts
-    a.addr(5, 0)
-    a.addr(0, 4)
-    a.bl(GET_XP)
-    a.raw(0x1A29)                 # subs r1, r5, r0  (XP still missing)
-    a.bcc("le", "level_done")
-    a.addr(0, 4)
-    a.bl(CREDIT_XP)
-    a.label("level_done")
-    a.pop(4, 5, 6, pc=True)
+    a.blx_reg(7)
+    a.label("capped_done")
+    a.pop(3, 4, 5, 6, 7, pc=True)
     a.label("player")             # r0 = PlayerLogic*; clobbers r0-r3
     a.push(4, lr=True)
     a.bl(LOGIC_MANAGER)
@@ -243,10 +253,66 @@ def _player_helpers() -> tuple[bytes, dict[str, int]]:
     a.blx_reg(3)
     a.pop(4, pc=True)
     blob = a.assemble()
-    return blob, {key: a.labels[key] for key in ("coins", "hearts", "xp", "level")}
+    return blob, {key: a.labels[key] for key in ("coins", "hearts", "xp", "player")}
 
 
-def _dispatch(helpers: dict[str, int], max_chars: int, max_builds: int) -> bytes:
+def _level_helpers(player: int, xp: int) -> tuple[bytes, dict[str, int]]:
+    """level(): +1 player level.  max_level(): straight to the top level.
+
+    Both credit XPForLevel(target) - XP through the capped XP helper, and do
+    nothing at the max level. The top level is Config[+0x58] + 1, the value
+    isPlayerMaxLevel compares against.
+    """
+    a = Asm(LEVEL_CAVE[0])
+    for name in ("level", "max_level"):
+        a.label(name)
+        a.push(4, 5, 6, lr=True)
+        a.bl(player)
+        a.addr(4, 0)
+        a.bl(IS_MAX_LEVEL)
+        a.cmp_imm(0, 0)
+        a.bcc("ne", f"{name}_done")
+        if name == "level":
+            a.addr(0, 4)
+            a.bl(GET_PLAYER_LEVEL)
+            a.adds_imm(0, 1)
+        else:
+            a.bl(SHARED_CONFIG)
+            a.ldr(0, 0, 0x58)
+            a.adds_imm(0, 1)
+        a.addr(1, 0)
+        a.addr(0, 4)
+        a.bl(XP_FOR_LEVEL)
+        a.addr(5, 0)
+        a.addr(0, 4)
+        a.bl(GET_XP)
+        a.raw(0x1A29)             # subs r1, r5, r0  (XP still missing)
+        a.bcc("le", f"{name}_done")
+        a.bl(xp)
+        a.label(f"{name}_done")
+        a.pop(4, 5, 6, pc=True)
+    blob = a.assemble()
+    return blob, {key: a.labels[key] for key in ("level", "max_level")}
+
+
+def _sprite_guard() -> bytes:
+    """CCSprite::initWithSpriteFrame(NULL) -> CCSprite::init() instead of a crash.
+
+    Unlocked store items and clothes can point at art the 3.8.0 APK never
+    shipped; the frame lookup returns NULL and the original dereferences it.
+    """
+    a = Asm(SPRITE_CAVE[0])
+    a.cmp_imm(1, 0)
+    a.bcc("ne", "frame")
+    a.b_w(SPRITE_INIT)            # tail call with r0 = this
+    a.label("frame")
+    a.push(4, 5, 6, lr=True)      # the two instructions the entry branch replaced
+    a.addr(2, 1)
+    a.b_w(SPRITE_INIT_FRAME + 4)
+    return a.assemble()
+
+
+def _dispatch(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int) -> bytes:
     """dispatch(tag in r0): run the native part of a button."""
     a = Asm(DISPATCH_CAVE[0])
     a.push(4, lr=True)
@@ -261,7 +327,7 @@ def _dispatch(helpers: dict[str, int], max_chars: int, max_builds: int) -> bytes
         (2, lambda: credit("coins", 100 * MILLION)),
         (3, lambda: credit("hearts", 10 * MILLION)),
         (4, lambda: credit("hearts", 100 * MILLION)),
-        (5, lambda: a.bl(helpers["level"])),
+        (5, lambda: a.bl(levels["level"])),
         (6, lambda: credit("xp", 5 * MILLION)),
         (7, lambda: a.bl(max_chars)),
         (8, lambda: a.bl(max_builds)),
@@ -276,7 +342,7 @@ def _dispatch(helpers: dict[str, int], max_chars: int, max_builds: int) -> bytes
     a.bcc("ne", "done")
     credit("coins", 100 * MILLION)
     credit("hearts", 100 * MILLION)
-    credit("xp", 5 * MILLION)
+    a.bl(levels["max_level"])
     a.bl(max_chars)
     a.bl(max_builds)
     a.label("done")
@@ -376,7 +442,12 @@ def install(data: bytearray, class_string: int, init_cave_start: int) -> None:
     _put(data, TITLE_CAVE, _titles(), "section titles")
     helpers_blob, helpers = _player_helpers()
     _put(data, PLAYER_CAVE, helpers_blob, "player helpers")
-    _put(data, DISPATCH_CAVE, _dispatch(helpers, CHAR_CAVE[0], BUILD_CAVE[0]), "dispatcher")
+    levels_blob, levels = _level_helpers(helpers["player"], helpers["xp"])
+    _put(data, LEVEL_CAVE, levels_blob, "level helpers")
+    _put(data, DISPATCH_CAVE, _dispatch(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0]), "dispatcher")
+    _expect(data, SPRITE_INIT_FRAME, bytes.fromhex("70b50a1c"))
+    _put(data, SPRITE_CAVE, _sprite_guard(), "sprite guard")
+    data[SPRITE_INIT_FRAME : SPRITE_INIT_FRAME + 4] = _b_wide(SPRITE_INIT_FRAME, SPRITE_CAVE[0])
     _put(data, ACTION_CAVE, _action_cave(class_string), "action cave")
     start = (init_cave_start + 1) & ~1
     _put(data, (start, INIT_CAVE_END), _init_cave(start), "settings tab cave")

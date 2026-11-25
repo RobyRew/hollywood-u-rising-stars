@@ -47,7 +47,7 @@ ROWS = (
         (7, b"MAX\nFRIENDS", BLUE),
         (8, b"MAX\nBUILDINGS", BLUE),
     ),
-    ((9, b"EVERYTHING", RED), (10, b"EXPORT", RED), (11, b"IMPORT", RED)),
+    ((9, b"UNLOCK ALL", RED), (10, b"EXPORT", RED), (11, b"IMPORT", RED)),
 )
 ROW_Y = (54.0, -29.0, -112.0)
 # The linen panels span x -140..195 (centre 27.5).
