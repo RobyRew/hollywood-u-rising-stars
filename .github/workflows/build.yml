@@ -18,7 +18,7 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Compile the patcher
-        run: python3 -m py_compile patcher/patch_apk.py patcher/hwu_native.py
+        run: python3 -m py_compile patcher/patch_apk.py patcher/hwu_native.py patcher/rr_tab.py patcher/rr_card.py patcher/thumb.py
       - name: Download the 3.8.0 APK
         env:
           GH_TOKEN: ${{ github.token }}

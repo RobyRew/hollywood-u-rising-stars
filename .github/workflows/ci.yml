@@ -13,4 +13,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Compile the patcher
-        run: python3 -m py_compile patcher/patch_apk.py patcher/hwu_native.py
+        run: python3 -m py_compile patcher/patch_apk.py patcher/hwu_native.py patcher/rr_tab.py patcher/rr_card.py patcher/thumb.py

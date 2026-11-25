@@ -2,6 +2,37 @@
 
 These notes are for the personal offline patch of `com.pixelberrystudios.hwuandroid` 3.8.0. The game itself is not in this repo. Addresses are offsets in `lib/armeabi-v7a/libHSS.so`. The first executable LOAD is identity-mapped, so a file offset is the same number as the Thumb address with the low bit cleared.
 
+## What changed after 1.0.8
+
+The sections below were written against 1.0.8. Later builds changed these parts:
+
+| 1.0.8 | 1.0.20 / 1.0.21 |
+| --- | --- |
+| HUD plus buttons credit 10,000,000 (`ADD_COINS_STUB`) | the stubs are no longer written; the plus buttons open the store |
+| `AppStoreManager::purchase` branches to the product-id cave at `0x3A43FA` | `purchase` (`0x4015C8`) calls the game's `creditPurchase` (`0x3F5290`) through `LOCAL_PURCHASE`, so a product grants its config reward. Nothing branched to `0x3A43FA` any more; 1.0.21 reuses that space |
+| `meetsPassiveCompletionRequirements` / `doesCharacterMeetRequirement` forced true | only byte-checked, not patched; quests use the game's rules |
+| tutorial entry points return early | only byte-checked; `hss.lua` `tutorialWaitForTap` is emptied so the letter does not wait |
+| `0x3A4540` payout epilogue | not written; the 1.0.20 release still carried unreachable bytes there and in `0x36A818..0x36A900` from an earlier build |
+
+## RR MOD settings tab (1.0.21)
+
+`SettingsDialogState::onInit` (`0x3B9204`) builds the dialog from three cards, each `CCBuilder::nodeGraphWithFile(ccb)` then `TabbedDialog::addTab(name, icon, node, false)` (`0x4B6970`) and `setTabEnabled` (`0x4B69D8`):
+
+| Tab | Name key | Icon | Card |
+| --- | --- | --- | --- |
+| Help | `icon.help` | `button_help.png` | `help_card.ccb` |
+| Settings | store title type 4 | `button_settings.png` | `android_settings_card.ccb` (`SettingsCard`) |
+| Alerts | `icon.alerts` | `button_notifications_tab.png` | `alerts_settings_card.ccb` |
+
+`rr_tab.py` replaces the last store at `0x3B93E4` with a branch to a cave that adds a fourth tab, `RR MOD`, with `button_settings.png` and `rr_mod_card.ccb`.
+
+- `.ccb` files are `darthkitty.Proto.CcbNode` protobufs. Field numbers come from `CcbNode::k*FieldNumber` in the library: 1 class, 7/8 member name/type, 9 position, 11/12 scale, 17 tag, 59 custom class, 62 label string, 63-65 sprite frames, 67 selector, 69 children.
+- Section titles are `DKLabelTTF` members of `SettingsCard` at `+0x164`, `+0x168`, `+0x16C`. `SettingsCard::init` dereferences every member, so the RR card skips `init` and sets the three titles through `CCLabelProtocol::setString` (vtable slot 0). Their Lobster font comes from a `Config.protobin` field 23 entry keyed by the ccb file name.
+- Card callbacks call `listener->onDialogResult(dialog, action, NULL)`: no sender reaches `onDialogResult`. The hook is on `SettingsCard::privacyPolicyButtonCallback` (`0x49E8A8`) instead. When `this` equals the pointer stored at `0x980BD0`, the tapped `CCMenuItem`'s tag (`CCNode` `+0x7C`) selects the action, then `OfflineMenu.nativeAction(int)` runs through `JniHelper::getStaticMethodInfo` and JNIEnv slot 141 (`CallStaticVoidMethod`).
+- Friends and A-listers: `LogicManager` vtable `+0x28` is `CharacterLogic`. Its character map header is `+0x60` (leftmost node at `+0x68`, id at node `+0x10`). For each id, `getNumOfSkillLevelsToMax` (`0x3CDB3C`) levels go to `addSkillPoints(id, levels)` (`0x3CDBBC`), which walks the level table and tells the character listeners.
+- Buildings: `LogicManager` vtable `+0x20` is `BuildingLogic`. `[+0x24]` vtable `+0x14` is the mutable `GameState`; buildings are the repeated field at `+0x38` / count `+0x3C`. `Building` is type `+0x20`, id `+0x24`, upgrade level `+0x2C`, has-bits `+0x3C` (bit 4 = level). `getMaxUpgradeLevel(type)` (`0x3C7D18`) is `StructureConfig[+0x38] - 1`. After writing the level the cave calls each listener in the `std::list` at `BuildingLogic+0x1C` with `(BuildingKey{vptr, type, id}, level)`, as `purchaseUpgrade` (`0x3CB1D8`) does. The `BuildingKey` vptr is the GOT entry at `0x9725CC` plus 8.
+- The caves live in the dead bodies of the `DKLeanPlumManager::track` overloads (`0x369738..0x369A30`; every entry is already `bx lr` and callers only branch to entries), the former product-id cave (`0x3A43FA..0x3A44B6`) and the server-time tail after the OFFLINE cave (`..0x3A45F8`).
+
 The phone used for the live checks is an LG Wing, Android 10, not rooted. Frida cannot attach with `frida-server`. The debug build loads `libfrida-gadget.so` and listens on `127.0.0.1:27042`. A normal patch from `patcher/patch_apk.py` does not include the gadget. `tools/frida/quest.js` is the hook list.
 
 ## Cash and diamonds

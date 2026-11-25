@@ -29,6 +29,23 @@
     return-void
 .end method
 
+.method public static nativeAction(I)V
+    .locals 2
+
+    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
+
+    if-eqz v0, :missing
+
+    new-instance v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Native;
+
+    invoke-direct {v1, v0, p0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Native;-><init>(Landroid/app/Activity;I)V
+
+    invoke-virtual {v0, v1}, Landroid/app/Activity;->runOnUiThread(Ljava/lang/Runnable;)V
+
+    :missing
+    return-void
+.end method
+
 .method public static show(Landroid/app/Activity;)V
     .locals 11
 

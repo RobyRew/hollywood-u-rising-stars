@@ -15,12 +15,13 @@ import sys
 from pathlib import Path
 
 from hwu_native import patch_libhss
+from rr_card import add_config_style, build_card
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
 # Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
-VERSION_PATCH = 20
+VERSION_PATCH = 21
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
 VERSION_CODE = 10000 + VERSION_PATCH
@@ -153,6 +154,7 @@ def patch_smali_tree(smali_root: Path) -> None:
         "OfflineMenu$Row.smali",
         "OfflineMenu$Run.smali",
         "OfflineMenu$Toggle.smali",
+        "OfflineMenu$Native.smali",
     ):
         shutil.copyfile(ROOT / "patcher" / extra, destination.parent / extra)
     pending = receivers = receivers4 = 0
@@ -379,7 +381,7 @@ def patch_native_libs(decoded: Path) -> None:
     shutil.copytree(armeabi, v7a)
     for folder in (armeabi, v7a):
         patch_libhss(folder / "libHSS.so")
-    print(f"native: offline client, store, save menu, tutorial skipped, {VERSION_NAME}")
+    print(f"native: offline client, store, RR MOD tab, save menu, {VERSION_NAME}")
 
 
 def run(command: list[str]) -> None:
@@ -426,6 +428,10 @@ def main() -> int:
         if old_wait not in lua and new_wait not in lua:
             raise RuntimeError("could not find tutorialWaitForTap")
         helper.write_text(lua.replace(old_wait, new_wait, 1), encoding="utf-8")
+    assets = args.work / "assets"
+    (assets / "rr_mod_card.ccb").write_bytes(build_card((assets / "android_settings_card.ccb").read_bytes()))
+    config = assets / "Config.protobin"
+    config.write_bytes(add_config_style(config.read_bytes()))
     patch_native_libs(args.work)
 
     unsigned = args.work.parent / "unsigned.apk"

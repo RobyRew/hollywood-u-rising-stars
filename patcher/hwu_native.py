@@ -9,6 +9,8 @@ from __future__ import annotations
 import struct
 from pathlib import Path
 
+import rr_tab
+
 # onServerTimeFailure. The original function showed the Offline dialog.
 SERVER_TIME_FAIL = 0x3A43E8
 GET_CURRENT_MILLIS = 0x40BFA0
@@ -243,109 +245,6 @@ def _server_time_trampoline() -> bytes:
     return blob
 
 
-def _purchase_cave() -> bytes:
-    """Grant currency from a product id, then tell the store the buy finished.
-
-    The 5th character selects the wallet and where the number starts:
-    hwu_rings_, hwu_coins_, hwu_stars_ at offset 10; hwu_xp_ at 7;
-    hwu_pencils_ and hwu_tickets_ at 12. Parsing stops at the first non-digit,
-    so hwu_rings_280_real grants 280.
-    """
-    labels: dict[str, int] = {}
-    pending: list[tuple[str, int, str]] = []
-    out = bytearray()
-
-    def here() -> int:
-        return CAVE + len(out)
-
-    def emit(data: bytes) -> None:
-        out.extend(data)
-
-    def mark(name: str) -> None:
-        labels[name] = here()
-
-    def emit_b(cond: str, name: str) -> None:
-        pending.append((cond, here(), name))
-        emit(b"\x00\x00")
-
-    def kind(letter: str, code: int, skip: int, name: str) -> None:
-        emit(_cmp_imm(0, ord(letter)))
-        emit_b("ne", name)
-        emit(_movs_imm(7, code))
-        emit(_movs_imm(2, skip))
-        emit_b("al", "parse")
-        mark(name)
-
-    emit(_hw(0xB5F0))  # push {r4-r7, lr}
-    emit(_hw(0xB081))  # sub sp, #4
-    emit(_mov_low(4, 0))
-    emit(_mov_low(5, 1))
-    emit(_ldr_imm(6, 5, 0))
-    emit(_ldrb(0, 6, 4))
-    kind("r", 2, 10, "try_c")  # rings -> hearts
-    kind("c", 1, 10, "try_x")
-    kind("x", 3, 7, "try_s")
-    kind("s", 4, 10, "try_p")
-    kind("p", 5, 12, "try_t")
-    kind("t", 6, 12, "finish")
-    mark("parse")
-    emit(_hw(0x18D6))  # adds r6, r6, r2
-    emit(_movs_imm(0, 0))
-    mark("loop")
-    emit(_ldrb(1, 6, 0))
-    emit(_cmp_imm(1, ord("0")))
-    emit_b("lt", "parsed")
-    emit(_cmp_imm(1, ord("9")))
-    emit_b("gt", "parsed")
-    emit(_sub_imm(1, ord("0")))
-    emit(_movs_imm(2, 10))
-    emit(_muls(0, 2))
-    emit(_adds_reg(0, 0, 1))
-    emit(_add_imm(6, 1))
-    emit_b("al", "loop")
-    mark("parsed")
-    emit(_cmp_imm(0, 0))
-    emit_b("eq", "finish")
-    emit(_mov_low(6, 0))
-    emit(_bl(here(), GET_SINGLETON))
-    emit(_ldr_imm(3, 0, 0))
-    emit(_ldr_imm(3, 3, 0x48))
-    emit(_hw(0x4798))  # blx r3
-    emit(_mov_low(1, 6))
-    credits = (
-        (1, CREDIT_COINS, "k2"),
-        (2, CREDIT_HEARTS, "k3"),
-        (3, CREDIT_XP, "k4"),
-        (4, CREDIT_STARS, "k5"),
-        (5, CREDIT_PENCILS, "k6"),
-        (6, CREDIT_TICKETS, "finish"),
-    )
-    for code, target, nxt in credits:
-        emit(_cmp_imm(7, code))
-        emit_b("ne", nxt)
-        emit(_bl(here(), target))
-        emit_b("al", "finish")
-        mark(nxt)
-    mark("finish")
-    emit(_mov_low(0, 4))
-    emit(_mov_low(1, 5))
-    emit(_bl(here(), FIRE_PURCHASE_COMPLETED))
-    emit(_hw(0xB001))  # add sp, #4
-    emit(_hw(0xBDF0))  # pop {r4-r7, pc}
-
-    cond = {"eq": 0, "ne": 1, "lt": 11, "gt": 12, "al": None}
-    for kind_name, src, name in pending:
-        dst = labels[name]
-        if kind_name == "al":
-            encoded = _b_short(src, dst)
-        else:
-            encoded = _b_cond(src, cond[kind_name], dst)
-        out[src - CAVE : src - CAVE + 2] = encoded
-    if CAVE + len(out) >= 0x3A45F8:
-        raise RuntimeError("purchase cave spilled into the next function")
-    return bytes(out)
-
-
 def _offline_menu_cave() -> bytes:
     """Call OfflineMenu.showFromGame from the settings card's About button."""
     cls = b"com/pixelberrystudios/hwuandroid/OfflineMenu\x00"
@@ -456,13 +355,10 @@ def patch_libhss(path: Path) -> None:
     _expect(data, GRANT_XP, bytes.fromhex("30b51820"))
 
     trampoline = _server_time_trampoline()
-    cave = _purchase_cave()
     data[SERVER_TIME_FAIL : SERVER_TIME_FAIL + len(trampoline)] = trampoline
-    data[CAVE : CAVE + len(cave)] = cave
-    # setLocked(bool) ignores the argument and always clears the lock badge.
-    locked_cave = CAVE + len(cave)
-    if locked_cave % 2:
-        locked_cave += 1
+    # CAVE..0x3A44B6 held a product-id parser that nothing branched to after
+    # purchase() moved to the game's own creditPurchase. rr_tab reuses it.
+    locked_cave = 0x3A44B6
     stub = _movs_imm(1, 0) + bytes(data[SET_LOCKED : SET_LOCKED + 4]) + _b_wide(locked_cave + 6, SET_LOCKED + 4)
     if locked_cave + len(stub) >= 0x3A45F8:
         raise RuntimeError("lock stub spilled into the next function")
@@ -490,6 +386,7 @@ def patch_libhss(path: Path) -> None:
     data[PURCHASE_CURRENCY_REQUIRE_ACCOUNT : PURCHASE_CURRENCY_REQUIRE_ACCOUNT + 2] = bytes.fromhex("00bf")
     menu = _offline_menu_cave()
     data[OFFLINE_CAVE : OFFLINE_CAVE + len(menu)] = menu
+    menu_class = OFFLINE_CAVE + menu.index(b"com/pixelberrystudios/hwuandroid/OfflineMenu\x00")
     data[ABOUT_BUTTON : ABOUT_BUTTON + 4] = _b_wide(ABOUT_BUTTON, OFFLINE_CAVE)
     data[GRANT_CASH : GRANT_CASH + len(GRANT_CASH_STUB)] = GRANT_CASH_STUB
     data[GRANT_DIAMONDS : GRANT_DIAMONDS + len(GRANT_DIAMONDS_STUB)] = GRANT_DIAMONDS_STUB
@@ -529,4 +426,6 @@ def patch_libhss(path: Path) -> None:
     data[0x3F4EC8 : 0x3F4EC8 + 2] = _movs_imm(0, 0)
     data[0x3F4EEA : 0x3F4EEA + 2] = _movs_imm(0, 0)
     data[0x3F4EFA : 0x3F4EFA + 2] = _movs_imm(0, 0)
+    # RR MOD tab in the game's Settings dialog. See rr_tab.py.
+    rr_tab.install(data, menu_class, OFFLINE_CAVE + len(menu))
     path.write_bytes(data)
