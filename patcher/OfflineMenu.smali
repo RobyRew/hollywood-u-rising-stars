@@ -31,7 +31,11 @@
 .method public static nativeAction(I)V
     .locals 2
 
-    sget-object v0, Lcom/pixelberrystudios/iab/BaseIabActivity;->i:Lcom/pixelberrystudios/iab/BaseIabActivity;
+    # BaseIabActivity.i is package-private; reading it from this package
+    # throws IllegalAccessError. getInstance() is public.
+    invoke-static {}, Lcom/pixelberrystudios/iab/BaseIabActivity;->getInstance()Lcom/pixelberrystudios/iab/BaseIabActivity;
+
+    move-result-object v0
 
     if-eqz v0, :missing
 
