@@ -25,7 +25,15 @@ VERSION_PATCH = 21
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
 VERSION_CODE = 10000 + VERSION_PATCH
-APK_NAME = f"Hollywood-U-{VERSION_NAME}.apk"
+GAME_VERSION = "3.8.0"
+# Release assets: the modded build and the untouched original side by side.
+APK_NAME = f"Hollywood-U_{GAME_VERSION}_RR-Mod_{VERSION_NAME}.apk"
+ORIGINAL_NAME = f"Hollywood-U_{GAME_VERSION}_original.apk"
+# One key signs every build, so each release installs over the previous one.
+# CI passes it through SIGNING_KEYSTORE / SIGNING_PASSWORD from repo secrets.
+KEYSTORE = Path(os.environ.get("SIGNING_KEYSTORE") or ROOT / "build" / "offline.keystore")
+KEY_PASSWORD = os.environ.get("SIGNING_PASSWORD") or "android"
+KEY_ALIAS = os.environ.get("SIGNING_ALIAS") or "hwu"
 
 METHOD_RE = re.compile(r"^\.method\b.*?^\.end method", re.M | re.S)
 LOCALS_RE = re.compile(r"^([ \t]*)\.locals (\d+)\s*$", re.M)
@@ -385,7 +393,7 @@ def patch_native_libs(decoded: Path) -> None:
 
 
 def run(command: list[str]) -> None:
-    print("+", " ".join(command))
+    print("+", " ".join("***" if part == KEY_PASSWORD else part for part in command))
     subprocess.run(command, check=True)
 
 
@@ -436,8 +444,11 @@ def main() -> int:
 
     unsigned = args.work.parent / "unsigned.apk"
     run([str(java), "-Xmx3g", "-jar", str(apktool), "b", str(args.work), "-o", str(unsigned)])
-    keystore = args.work.parent / "offline.keystore"
+    keystore = KEYSTORE
     if not keystore.exists():
+        if os.environ.get("CI"):
+            sys.exit(f"{keystore} is missing. Set the SIGNING_KEYSTORE_B64 and SIGNING_PASSWORD secrets.")
+        keystore.parent.mkdir(parents=True, exist_ok=True)
         keytool = Path(java).with_name("keytool")
         run(
             [
@@ -446,7 +457,7 @@ def main() -> int:
                 "-keystore",
                 str(keystore),
                 "-alias",
-                "hwu",
+                KEY_ALIAS,
                 "-keyalg",
                 "RSA",
                 "-keysize",
@@ -454,9 +465,9 @@ def main() -> int:
                 "-validity",
                 "10000",
                 "-storepass",
-                "android",
+                KEY_PASSWORD,
                 "-keypass",
-                "android",
+                KEY_PASSWORD,
                 "-dname",
                 "CN=Hollywood U Offline, O=Local, C=US",
             ]
@@ -474,11 +485,11 @@ def main() -> int:
             "--ks",
             str(keystore),
             "--ksAlias",
-            "hwu",
+            KEY_ALIAS,
             "--ksPass",
-            "android",
+            KEY_PASSWORD,
             "--ksKeyPass",
-            "android",
+            KEY_PASSWORD,
             "-o",
             str(signed_dir),
         ]

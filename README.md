@@ -88,9 +88,11 @@ The blue floating gear and the **OFFLINE** button in Settings still open the sam
 
 ## 📥 Install
 
-1. Download `Hollywood-U_3.8.0_RR-Mod_1.0.x.apk` from [**Releases**](https://github.com/RobyRew/hollywood-u-rising-stars/releases/latest) and copy it to the phone.
+1. Download `Hollywood-U_3.8.0_RR-Mod_1.0.x.apk` from [**Releases**](https://github.com/RobyRew/hollywood-u-rising-stars/releases/latest) and copy it to the phone. Each release also carries `Hollywood-U_3.8.0_original.apk`, Pixelberry's untouched client, and `SHA256SUMS.txt`.
 2. Play Protect will say it doesn't know the developer — that's the mod's own signing key. Choose **Install anyway**.
 3. Open the game. The campus and everything shipped inside the APK runs from the phone.
+
+Every release from 1.0.21 on is signed with the same key, so a new release installs over the old one and keeps your save.
 
 > [!IMPORTANT]
 > **Moving from 1.0.20 to 1.0.21+:** 1.0.20 was signed with a different key, so Android won't update it in place. Before uninstalling, tap the blue gear → **Export progress**, then install the new build and **Import progress**. (Or with a computer: `adb backup -noapk com.pixelberrystudios.hwuandroid`, reinstall, `adb restore`.)
@@ -121,7 +123,7 @@ flowchart LR
     B --> E[assets<br/>rr_mod_card.ccb, Config style, hss.lua]
     B --> F[libHSS.so<br/>Thumb patches + caves]
     C & D & E & F -->|apktool b| G[unsigned.apk]
-    G -->|uber-apk-signer| H[Hollywood-U-1.0.x.apk]
+    G -->|uber-apk-signer| H[Hollywood-U_3.8.0_RR-Mod_1.0.x.apk]
 ```
 
 **Needs:** Python 3.9+, a JDK 17+ (`java` on `PATH`, `JAVA_HOME`, or `--java`). Apktool 3.0.3 and uber-apk-signer 1.3.0 are in `tools/` (licenses in `tools/THIRD_PARTY.txt`).
@@ -130,14 +132,15 @@ flowchart LR
 python3 patcher/patch_apk.py --apk "Hollywood+U-+Rising+Stars_3.8.0_APKPure.apk"
 ```
 
-The result is `dist/Hollywood-U-1.0.x.apk` (releases rename it `Hollywood-U_3.8.0_RR-Mod_1.0.x.apk`). Releases stay on `1.0.x`; `VERSION_PATCH` in `patcher/patch_apk.py` is the only number to bump.
+The result is `dist/Hollywood-U_3.8.0_RR-Mod_1.0.x.apk`. Releases stay on `1.0.x`; `VERSION_PATCH` in `patcher/patch_apk.py` is the only number to bump.
 
-The first run creates `build/offline.keystore` and signs with it. **Keep that file** — a build signed with any other key can't update an installed copy.
+> [!IMPORTANT]
+> **One key signs everything.** Builds are signed with `build/offline.keystore` (alias `hwu`), or the file in `SIGNING_KEYSTORE` with the password in `SIGNING_PASSWORD`. Without that exact key a build can't update an installed copy. A local run creates the key only when none exists; on CI a missing key stops the build.
 
 | Option | Default |
 | --- | --- |
 | `--apk` | *(required)* the 3.8.0 APK, package `com.pixelberrystudios.hwuandroid` |
-| `--out` | `dist/Hollywood-U-1.0.x.apk` |
+| `--out` | `dist/Hollywood-U_3.8.0_RR-Mod_1.0.x.apk` |
 | `--java` | `JAVA_HOME/bin/java`, then `java` on `PATH` |
 | `--work` | `build/decoded` |
 
@@ -148,9 +151,16 @@ Every native patch checks the original bytes first, so any version other than 3.
 | Workflow | Runs on | Does |
 | --- | --- | --- |
 | **Check patcher** | every push and PR | compiles the Python |
-| **Build tweaked APK** | manual | downloads the APK attached to a release named `source-apk`, patches it, uploads the result as an artifact |
+| **Build and release** | manual run, or a pushed `1.0.x` tag | downloads the original from the `source-apk` release, patches it, signs it with the permanent key, and publishes release `1.0.x` with the RR-Mod APK, the original APK and `SHA256SUMS.txt` |
 
-A CI runner has no `build/offline.keystore`, so each workflow build is signed with a fresh key and can't update a copy installed from a local build or a release.
+To ship a new version: bump `VERSION_PATCH`, push, then run **Build and release** (or push the matching tag, e.g. `git tag 1.0.22 && git push origin 1.0.22`).
+
+The workflow needs two repo secrets, set once:
+
+```bash
+base64 -i build/offline.keystore | gh secret set SIGNING_KEYSTORE_B64
+gh secret set SIGNING_PASSWORD --body android
+```
 
 ---
 
@@ -158,7 +168,7 @@ A CI runner has no `build/offline.keystore`, so each workflow build is signed wi
 
 ```text
 patcher/
-├── patch_apk.py        decode → patch manifest, styles, smali, assets, lib → build → sign
+├── patch_apk.py        decode → patch manifest, styles, smali, assets, lib → build → sign (versions, names, key)
 ├── hwu_native.py       libHSS.so byte patches (offline, store, gates, HUD, grants)
 ├── rr_tab.py           RR MOD tab: Settings-dialog hook, button actions, max-level loops
 ├── rr_card.py          builds rr_mod_card.ccb and its Config.protobin title style

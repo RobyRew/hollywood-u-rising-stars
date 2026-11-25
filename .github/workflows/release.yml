@@ -1,0 +1,127 @@
+name: Build and release
+
+# Builds the modded APK from the original attached to the `source-apk` release,
+# signs it with the permanent key from the repo secrets, and publishes a release
+# with both APKs. The release tag is the mod version (VERSION_PATCH in
+# patcher/patch_apk.py), e.g. 1.0.21.
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a GitHub release (off = build artifact only)
+        type: boolean
+        default: true
+  push:
+    tags:
+      - "1.0.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Compile the patcher
+        run: python3 -m py_compile patcher/*.py
+
+      - name: Read versions
+        id: v
+        working-directory: patcher
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import patch_apk as p
+          print(f"mod={p.VERSION_NAME}")
+          print(f"game={p.GAME_VERSION}")
+          print(f"apk={p.APK_NAME}")
+          print(f"original={p.ORIGINAL_NAME}")
+          PY
+
+      - name: Check the tag matches the patcher version
+        if: github.ref_type == 'tag'
+        run: |
+          if [ "${{ github.ref_name }}" != "${{ steps.v.outputs.mod }}" ]; then
+            echo "::error::Tag ${{ github.ref_name }} but patcher/patch_apk.py says ${{ steps.v.outputs.mod }}. Bump VERSION_PATCH or retag."
+            exit 1
+          fi
+
+      - name: Download the original APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input
+          if ! gh release download source-apk -p '*.apk' -D input --clobber; then
+            echo "::error::Attach the original Hollywood U ${{ steps.v.outputs.game }} APK to a release tagged source-apk."
+            exit 1
+          fi
+          ls -la input
+
+      - name: Restore the signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::Set the SIGNING_KEYSTORE_B64 and SIGNING_PASSWORD repo secrets. Builds are never signed with a throwaway key."
+            exit 1
+          fi
+          mkdir -p build
+          printf '%s' "$KEYSTORE_B64" | base64 -d > build/offline.keystore
+
+      - name: Patch and sign
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: python3 patcher/patch_apk.py --apk input/*.apk
+
+      - name: Stage the release files
+        run: |
+          mkdir -p out
+          cp "dist/${{ steps.v.outputs.apk }}" out/
+          cp input/*.apk "out/${{ steps.v.outputs.original }}"
+          (cd out && sha256sum *.apk > SHA256SUMS.txt)
+          cat out/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hollywood-u-${{ steps.v.outputs.mod }}
+          path: out/*
+          if-no-files-found: error
+
+      - name: Publish the release
+        if: github.ref_type == 'tag' || inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.mod }}
+          GAME: ${{ steps.v.outputs.game }}
+          APK: ${{ steps.v.outputs.apk }}
+          ORIGINAL: ${{ steps.v.outputs.original }}
+        run: |
+          cat > notes.md <<NOTES
+          ## Hollywood U ${GAME} · RR Mod ${TAG}
+
+          | File | What it is |
+          | --- | --- |
+          | \`${APK}\` | the mod: offline, current Android, unlocked store, RR MOD settings tab |
+          | \`${ORIGINAL}\` | Pixelberry's untouched ${GAME} client |
+          | \`SHA256SUMS.txt\` | checksums of both |
+
+          Install the RR-Mod APK and choose **Install anyway** when Play Protect asks.
+          Every RR-Mod release is signed with the same key, so it installs over the previous one and keeps your save.
+          Coming from 1.0.20 (signed with an older key): gear → **Export progress**, uninstall, install this, then **Import progress**.
+          NOTES
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" out/* --clobber
+          else
+            gh release create "$TAG" out/* --target "${{ github.sha }}" --title "Hollywood U ${GAME} · RR Mod ${TAG}" --notes-file notes.md
+          fi
