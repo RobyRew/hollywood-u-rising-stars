@@ -1,0 +1,51 @@
+function inter_preview(co)
+hss.evt(co,"~Snapshot Dates are brief glimpses of the simpler things in love. Enjoy everything from lavish date nights to cozy moments of domestic fluff in these bite-sized quests.~", "")
+hss.evt(co,"~In this Snapshot Date, unwind after a long day of classes with a cozy movie night with Addison Sinclair!~", "")
+hss.markQuestScriptRequirementFinished()
+end
+function outro_date_0039_movie_1(co)
+hss.evt(co,"After an excruciatingly long day of classes, you return to your dorm to find the door to your room standing slightly ajar.", "")
+hss.dlgA(co,hss.U,"Hello? Is someone in there?",4)
+hss.evt(co,"As you approach the door, it flies back to reveal Addison, beaming at you with a huge tub of chocolate-covered popcorn in her arms.", "")
+hss.dlgA(co,hss.A,"Hey, {YOU}. Welcome home.",1)
+hss.dlgA(co,hss.U,"Addi! I didn't know you were coming over.",1)
+hss.evt(co,"You duck down to kiss her on the cheek before following her into your room, where a dozen electric candles cast soft shadows across the walls.", "")
+hss.evt(co,"A huge flatscreen TV now hangs on the wall where you used to have a cork board.", "")
+hss.dlg(co,hss.A,"I know you've had back-to-back classes all day, so I figured you could use some major downtime.")
+hss.dlgA(co,hss.A,"I brought a ~ton~ of movies and enough popcorn to feed a small army. And you know what the best part is?",1)
+hss.dlgA(co,hss.U,"I get to spend my downtime with the prettiest girl in all of Hollywood?",1)
+hss.dlgA(co,hss.A,"Ohmygosh, ~stop!~ You're making me blush!",1)
+hss.dlg(co,hss.U,"And the downside to that is...?")
+hss.dlgA(co,hss.A,"{YOU}!",1)
+hss.dlgA(co,hss.U,"Okay, okay. So what's the 'best part' you were talking about?",1)
+hss.dlg(co,hss.A,"The ~best part~ is... I'm ~not~ going to make you watch 'The Notebook'!")
+local choice = hss.showTextMenu(co, "What do you say?", "Best. Girlfriend. Ever.|But I love 'The Notebook'!");
+if (choice == 0) then
+hss.dlgA(co,hss.U,"Like, seriously. I'm going to have to talk to the Academy about adding a Best Girlfriend category to the Oscars, because you'd have that in the bag.",1)
+hss.evt(co,"You and Addison settle on the couch once a high-octane action thriller begins to play. You wrap an arm around her shoulders, pulling her close.", "")
+else
+hss.dlgA(co,hss.U,"I mean, if I were to make a list of the top ten date night movies, 'The Notebook' would be at ~least~ number seven.",4)
+hss.dlgA(co,hss.A,"{YOU}, I'm just teasing! Of ~course~ we're going to watch 'The Notebook'.",1)
+hss.evt(co,"You and Addison settle on the couch once the movie begins to play. You wrap an arm around her shoulders, pulling her close.", "")
+end
+hss.dlg(co,hss.U,"Thanks for all this, Addi. I can't think of a better way to unwind.")
+hss.dlgA(co,hss.A,"Me neither. You'll return the favor the next time I have a full day of classes, right?",1)
+hss.dlgA(co,hss.U,"You bet.",1)
+hss.showQuestComplete(co)
+hss.evt(co,"As the credits begin to roll, Addison yawns and snuggles closer. You set the empty popcorn bowl aside and smile down at her.", "")
+hss.dlg(co,hss.U,"Hey, sleepyhead. Time to turn in for the night?")
+hss.dlg(co,hss.A,"Mm... five more minutes...")
+hss.dlgA(co,hss.U,"Anything you want.",1)
+hss.evt(co,"Addison pulls back a few minutes later, smiling sleepily up at you. She lifts a hand and trails her fingers down your cheek, gazing deeply into your eyes... before breaking out in a fit of giggles!", "")
+hss.dlgA(co,hss.U,"What? Do I have something on my face?",4)
+hss.dlgA(co,hss.A,"Hee hee, you do ~now.~",1)
+hss.evt(co,"She waggles her chocolate-stained fingers in front of you, and you touch your cheek where she left behind a streak of melted chocolate.", "")
+hss.dlgA(co,hss.A,"Oops.",1)
+hss.dlgA(co,hss.U,"Why you little... c'mere!",1)
+hss.evt(co,"You tackle Addison to the couch and pepper her face with soft kisses, both of you laughing all the while...", "")
+hss.evt(co,"~Stay tuned for more Snapshot Dates, coming soon to Amour!~", "")
+end
+local sceneTable = {}
+sceneTable["inter_preview"] = inter_preview
+sceneTable["outro_date_0039_movie_1"] = outro_date_0039_movie_1
+hss.runScene(sceneTable)

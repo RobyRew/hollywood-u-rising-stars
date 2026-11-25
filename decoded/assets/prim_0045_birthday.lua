@@ -1,0 +1,418 @@
+function outro_prim_0045_birthday_1(co)
+hss.evt(co,"After Addison's interview with May, viewership figures for 'Kingdom Come' soar! The numbers rise with each episode.", "")
+hss.evt(co,"A few weeks later, you host a wrap party for season one of the show on-set at your production lot. Samantha finds you and Ethan in the crowd, handing you each a drink.", "")
+hss.dlgA(co,hss.U,"Thanks, Samantha. For everything.",1)
+hss.dlg(co,"SAMANTHA","If you really want to thank me, just keep up the good work.")
+hss.dlgA(co,hss.E,"That's the plan. If we keep this up, we'll be in the running for an Emma award in a few years, and that's ~the~ most prestigious award in TV.",1)
+hss.dlgA(co,"SAMANTHA","That's where you're wrong.",3)
+hss.dlg(co,"SAMANTHA","We're already Emma material. There's been a lot of buzz. 'Kingdom Come' is practically guaranteed to receive nominations for Best Actress and Best Costume Design.")
+hss.dlg(co,"SAMANTHA","We ~may~ even receive a Best Drama nomination.")
+hss.dlgA(co,hss.U,"Are you serious? That's awesome!",4)
+hss.dlg(co,"SAMANTHA","A few long-running dramas have four of the five nominations locked down, but that leaves one slot... and my sources tell me the nominations committee is definitely considering your show.")
+hss.dlgA(co,hss.U,"That's what I like to hear!",1)
+hss.dlg(co,"SAMANTHA","~But~... they're also considering 'Prohibition', Desiree's new show.")
+hss.evt(co,"Just then, the crowd parts and reveals Desiree, smiling as she approaches you.", "")
+hss.dlgA(co,"DESIREE","My ears are burning. Did somebody just mention my Emma nomination?",1)
+hss.dlg(co,"SAMANTHA","You haven't secured the nomination yet, Desiree.")
+hss.dlg(co,"DESIREE","That's just a technicality. The committee members are all dear friends of mine.")
+hss.dlgA(co,"DESIREE","That fifth nomination belongs to 'Prohibition'.",1)
+hss.dlgA(co,hss.U,"So you're just relying on nepotism.",3)
+hss.dlg(co,"DESIREE","That's Hollywood, {YOU}. It's too bad, really. You've worked ~so~ hard on your little show...")
+hss.dlgA(co,"DESIREE","But I guess you forgot to maintain your industry connections.",1)
+hss.evt(co,"With a wave of her fingers, she turns and glides through the crowd, heading back to her side of the lot.", "")
+hss.showQuestComplete(co)
+hss.dlgA(co,hss.U,"How does she keep getting over here? Isn't there a ~wall?~ That ~she~ built?",3)
+hss.dlgA(co,"SAMANTHA","Who cares? What's important is she's right. She does have more contacts than you, and that means she has a better shot at this nomination.",3)
+hss.dlgA(co,hss.U,"What can we do? I do ~not~ want her stealing this from us just because she knows people.",3)
+hss.dlg(co,"SAMANTHA","Glad you feel that way, {YOU}, because I already have a plan.")
+hss.dlg(co,"SAMANTHA","Several key committee members will be at an exclusive party tomorrow night, and I've secured a set of invites for us.")
+hss.dlg(co,hss.U,"Great. Sounds like the perfect networking opportunity.")
+hss.dlgA(co,hss.E,"Yeah, about that. I heard about this party, too. It's a birthday party...",2)
+hss.dlgA(co,hss.E,"Specifically, ~Brian Ratzik's~ birthday party.",3)
+end
+function intro_prim_0045_birthday_2(co)
+hss.dlgA(co,hss.U,"You have ~got~ to be kidding me. We have to go to Ratzik's birthday party?",3)
+hss.dlgA(co,"SAMANTHA","Yes. Anyone who's anyone will be there. It's your best shot at winning over the committee members you need to get a nomination for 'Kingdom Come'.",3)
+hss.dlgA(co,hss.U,"I know, but... only if Addison's okay with it.",2)
+hss.evt(co,"The next night, Ethan drives you and Addison across town to Ratzik's sprawling Beverly Hills mansion.", "")
+hss.dlgA(co,hss.A,"You don't need to look so worried, {YOU}. I'm totally okay with going to Brian's party.",1)
+hss.dlg(co,hss.A,"He hasn't tried to contact me at all in the past few weeks.")
+hss.dlgA(co,hss.A,"Maybe he really has changed.",1)
+hss.dlg(co,hss.U,"Fingers crossed, I guess.")
+hss.evt(co,"As Ethan pulls up in front of the grandiose mansion, you take in the sight of a huge fountain before the towering oak doors, surrounded by tall topiaries carved into elegant, modernist shapes and arcs.", "")
+hss.dlgA(co,hss.U,"This is way more tasteful than what I expected. I kind of thought we'd see huge statues of hot girls or something.",4)
+hss.dlgA(co,hss.A,"The last time I was here, there ~were~ huge statues of hot girls all over the place! He's totally redecorated.",4)
+hss.evt(co,"Samantha meets you at the front door, which swings open to reveal Ratzik himself.", "")
+hss.dlgA(co,hss.BR,"Addison? I didn't call you in my sleep and hit on you, did I?",4)
+hss.dlgA(co,hss.A,"Um... not recently?",4)
+hss.dlg(co,hss.BR,"Oh, good. I've been working hard to kick that habit.")
+hss.dlgA(co,"SAMANTHA","Are you going to leave us out here all night or what?",3)
+hss.dlgA(co,hss.BR,"My apologies. Come on in... there's somebody very important I want you all to meet.",1)
+end
+function outro_prim_0045_birthday_2(co)
+hss.evt(co,"You follow Ratzik inside his mansion, where a crowd of elegantly dressed guests mingle beneath dazzling chandeliers.", "")
+hss.dlg(co,hss.U,"So who's this VIP you want us to meet, Ratzik?")
+hss.dlgA(co,hss.BR,"Me, of course.",1)
+hss.dlgA(co,hss.U,"Are you still concussed? We already know you.",4)
+hss.dlg(co,hss.BR,"Who I ~was~, {YOU}. I had an epiphany after my accident. Life is short, and I want to be the best me... ~be the best me.~")
+hss.dlgA(co,hss.U,"Uh, you said that twice. Seriously, do you need to go back to the hospital?",4)
+hss.dlg(co,hss.BR,"Don't be ridiculous. It's just the mantra I live my life by, now that I've turned over a new leaf.")
+hss.evt(co,"As you follow Ratzik through the foyer, you take in the gold and red leaves strewn about the whole mansion.", "")
+hss.dlgA(co,hss.U,"This is really... literal.",4)
+hss.dlgA(co,hss.BR,"I thought it'd be a fitting theme for my 43rd birthday.",1)
+hss.dlg(co,hss.U,"Hang on. Are we expected to believe you're only ~43~?")
+hss.dlg(co,hss.BR,"Believe what you want, {YOU}. Tonight's not about little technicalities like ~age~.")
+hss.dlgA(co,hss.A,"Um, it ~is~ your birthday, Brian. What else is this party about?",4)
+hss.dlgA(co,hss.BR,"Celebrating the new era of me, of course.",1)
+hss.evt(co,"He turns to you with a small frown.", "")
+hss.dlg(co,hss.BR,"I guess you're welcome to stay, {YOU}. You ~did~ help figure out who nearly killed me.")
+hss.evt(co,"The deep chime of the doorbell cuts through the air.", "")
+hss.dlgA(co,hss.BR,"Ah, excuse me. I have other guests to greet.",1)
+hss.evt(co,"Brian bows deeply to you and your friends before heading to the door.", "")
+hss.dlgA(co,hss.U,"Well, that was... borderline pleasant. Was that seriously Brian Ratzik?",4)
+hss.dlg(co,"SAMANTHA","Forget him, for now. We're here on a mission.")
+hss.showQuestComplete(co)
+hss.dlg(co,"SAMANTHA","Based on my intel, nearly half of the Emma committee members are voting for 'Kingdom Come'.")
+hss.dlg(co,"SAMANTHA","You'll need three more votes to secure the nomination.")
+hss.dlgA(co,"SAMANTHA","And with the list of nominees coming out tomorrow, you have to get those votes ~tonight~.",3)
+hss.dlg(co,hss.U,"Then let's hope there are at least three committee members here.")
+hss.dlg(co,"SAMANTHA","There are. I'll start you off with an easy one... your first task is to win over Marianne Delacroix.")
+end
+function intro_prim_0045_birthday_3(co)
+hss.dlgA(co,hss.A,"Oh, perfect! Marianne's on the committee? I just saw her over there!",1)
+hss.evt(co,"Addison points to a grand, winding staircase leading to a balcony overlooking the foyer. Marianne leans against the railing, scrutinizing every new arrival.", "")
+hss.dlgA(co,"MARIANNE","...",3)
+hss.dlgA(co,hss.U,"She looks... friendly. By which I mean she ~doesn't~.",4)
+hss.dlg(co,hss.A,"Don't worry, {YOU}. She's not as unapproachable as she looks.")
+if hss.tutorialIsQuestFinished("tert_addison_8") then
+hss.dlgA(co,hss.A,"Since interning for her at Faux Pas, I've gotten to know her pretty well.",1)
+hss.dlg(co,hss.A,"She's super passionate about fashion, so I just ~know~ she'd be impressed if you could show off your own fashion knowledge.")
+else
+hss.dlgA(co,hss.A,"She's the editor-in-chief of Faux Pas magazine, and I hear she ~loves~ talking about fashion.",1)
+hss.dlg(co,hss.A,"I just ~know~ she'd be impressed if you could show off your own fashion knowledge!")
+end
+hss.dlgA(co,hss.U,"I can do that.",1)
+if (hss.getCharacterType("YOU") == hss.CharacterType.FASHIONISTA) then
+hss.dlg(co,hss.U,"I ~am~ a fashionista, after all.")
+hss.dlgA(co,hss.A,"That's right, you got this!",1)
+else
+hss.dlg(co,hss.U,"You've taught me a lot about style, after all.")
+hss.dlgA(co,hss.A,"Hee hee, exactly! You've got this, {YOU}!",1)
+end
+end
+function outro_prim_0045_birthday_3(co)
+hss.evt(co,"You and Addison head up the winding staircase. As you near Marianne, you spot Desiree chatting with her.", "")
+hss.dlgA(co,hss.U,"Guess Desiree wasn't bluffing about having a lot of contacts.",2)
+hss.evt(co,"Desiree and Marianne exchange air kisses, and you scowl as Desiree smirks at you on her way down the stairs.", "")
+hss.dlg(co,"DESIREE","You're too late, {YOU}. Marianne's all but promised me her vote.")
+hss.dlgA(co,hss.U,"I can work with 'all but.' This isn't over, Desiree.",3)
+hss.dlgA(co,"DESIREE","You keep telling yourself that, {YOU}.",1)
+hss.evt(co,"After Desiree joins the crowd downstairs, you turn to Addison.", "")
+hss.dlg(co,hss.U,"It won't be easy to sway Marianne if she's friends with Desiree. Got any pointers?")
+hss.dlg(co,hss.A,"Hm... well, in terms of fashion, Marianne's a fan of classic styles, and she hates the outlandish fads that crop up once in a while.")
+hss.dlg(co,hss.A,"So she loves the neo-Victorian trend of lacy, floor-length dresses, and loathes that '80s style is coming back with a neon vengeance.")
+hss.dlgA(co,hss.A,"But just be honest with her, and be self-assured. She really respects people who are confident.",1)
+hss.dlgA(co,hss.U,"Got it. Thanks, Addi.",1)
+hss.evt(co,"You join Marianne on the balcony overlooking the foyer. She glances at you, then sweeps an arm out at the crowd.", "")
+hss.dlg(co,"MARIANNE","There certainly are some interesting outfits here tonight, wouldn't you say?")
+hss.dlg(co,hss.U,"Oh, definitely. There's an eclectic mix of good and bad. I'd say the ~best~ dressed are the...")
+local choice = hss.showTextMenu(co, "What do you say?", "Classically dressed guests.|Trendy party animals.", false, 3);
+if (choice == 0) then
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward0") == nil then
+hss.setQuestProperty("reward0",1)
+hss.dlgA(co,hss.U,"These new fads come and go, but classics are enduring.",0,hss.REWARD_COINS,50)
+else
+hss.dlgA(co,hss.U,"These new fads come and go, but classics are enduring.",0)
+end
+hss.dlgA(co,"MARIANNE","Precisely.",1)
+hss.dlg(co,hss.U,"I'm particularly impressed with...")
+elseif (choice == 1) then
+hss.dlgA(co,hss.U,"They're the life of the party!",1)
+hss.dlgA(co,"MARIANNE","Some may call them that. Others, myself included, would label them tasteless.",3)
+hss.dlgA(co,hss.U,"Oh...",2)
+hss.dlg(co,hss.U,"You're right. The classics never fail. That's why I'm particularly impressed with...")
+else
+hss.evt(co,"Your mind goes totally blank, and you trail off.", "")
+hss.dlgA(co,"MARIANNE","How eloquent.",3)
+hss.dlgA(co,hss.U,"Uh, sorry. I was just distracted by an awesome outfit!",4)
+hss.dlg(co,hss.U,"Look, right over there. I'm super impressed with...")
+end
+local choice = hss.showTextMenu(co, "What do you say?", "That girl in the hot pink crop top.|The lady in an elegant black gown.", false, 3);
+if (choice == 0) then
+hss.dlg(co,hss.U,"She's totally embracing the '80s comeback trend!")
+hss.dlgA(co,"MARIANNE","Indeed. You both seem blissfully unaware that some decades are better left in the past.",3)
+elseif (choice == 1) then
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward1") == nil then
+hss.setQuestProperty("reward1",1)
+hss.dlgA(co,hss.U,"The lace detailing on the sleeves makes it a stand-out piece, a perfect encapsulation of the neo-Victorian trend.",0,hss.REWARD_COINS,50)
+else
+hss.dlgA(co,hss.U,"The lace detailing on the sleeves makes it a stand-out piece, a perfect encapsulation of the neo-Victorian trend.",0)
+end
+hss.dlgA(co,"MARIANNE","Yes, I was admiring that lacework, as well.",1)
+else
+hss.evt(co,"You forget who you were about to point to and gesture randomly at the girl in the hot pink crop top.", "")
+hss.dlgA(co,hss.U,"She, uh... she's totally embracing the '80s comeback trend!",4)
+hss.dlgA(co,"MARIANNE","Indeed. You both seem blissfully unaware that some decades are better left in the past.",3)
+end
+hss.evt(co,"Marianne gives you a critical once-over.", "")
+hss.dlg(co,"MARIANNE","You seem to have many thoughts on fashion. So tell me, what do you think of ~your~ outfit? Are you pleased with it?")
+hss.dlgA(co,hss.U,"I...",4)
+local choice = hss.showTextMenu(co, "What do you say?", "Could've chosen something better.|Only wear outfits I love.");
+if (choice == 0) then
+hss.dlgA(co,hss.U,"I didn't have a lot of time to prepare for this party. I guess I look pretty bad...",2)
+hss.dlgA(co,"MARIANNE","Well, you certainly do now. Your outfit is fine, but this lack of self-confidence doesn't look good on ~anyone~.",3)
+hss.evt(co,"Just then, Addison rushes up to you. She shoots you a bewildered look, then beams at Marianne.", "")
+hss.dlgA(co,hss.A,"Ms. Delacroix! It's such a pleasure to run into you here. How are you?",4)
+hss.dlgA(co,"MARIANNE","Oh, hello there. You're just the person I wanted to see, actually. I've been meaning to speak with you about your work on 'Kingdom Come'.",1)
+hss.evt(co,"Addison and Marianne chat for nearly an hour about the grueling work that goes into the making of 'Kingdom Come'...", "")
+hss.dlg(co,"MARIANNE","Your costume design drew me in, and your phenomenal work as Princess Ellyn kept me riveted.")
+hss.dlgA(co,hss.A,"Can we count on your nomination for the Emmas?",1)
+hss.dlg(co,"MARIANNE","You may.")
+elseif (choice == 1) then
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward2") == nil then
+hss.setQuestProperty("reward2",1)
+hss.dlgA(co,hss.U,"I'd never be seen in anything I'm not proud to be photographed in.",0,hss.REWARD_COINS,50)
+else
+hss.dlgA(co,hss.U,"I'd never be seen in anything I'm not proud to be photographed in.",0)
+end
+hss.dlgA(co,"MARIANNE","We have that in common. You're {YOU}, correct? I've heard a great deal about your show.",1)
+hss.dlgA(co,hss.U,"That's what I wanted to talk to you about.",1)
+hss.evt(co,"You and Marianne chat for nearly an hour about the grueling work that goes into the making of 'Kingdom Come'...", "")
+hss.dlg(co,"MARIANNE","The costumes on your show drew me in, but it was the story that kept my attention.")
+hss.dlgA(co,"MARIANNE","That marvelous twist, where we ~thought~ Aldis would betray the princess... it was simply chilling.",1)
+hss.dlgA(co,hss.U,"Then we can count on your nomination?",1)
+hss.evt(co,"Marianne extends a hand for you to shake.", "")
+hss.dlg(co,"MARIANNE","You may.")
+end
+hss.showQuestComplete(co)
+hss.evt(co,"After Marianne promises her vote to 'Kingdom Come', you head back downstairs and find Samantha waiting outside the den with Professor Hunt.", "")
+hss.dlgA(co,"THOMAS","{YOU}.",3)
+hss.dlgA(co,hss.U,"Wait, are ~you~ one of the committee members?",4)
+hss.dlgA(co,"SAMANTHA","As if it'd be that easy. No, he's here to help, because the next committee member you need to win over is Priya Singh.",3)
+hss.dlgA(co,hss.U,"~Priya~? But she ~hates~ me.",4)
+hss.dlgA(co,"THOMAS","Then show her you've changed. Priya is a reserved woman, difficult to impress. But she values dignity and respect.",3)
+hss.dlg(co,"SAMANTHA","Just be polite and professional, {YOU}. Now, move it. I saw Priya go in there a few minutes ago...")
+hss.evt(co,"You and Hunt approach the door to the den just as Ratzik exits through it.", "")
+hss.dlg(co,hss.BR,"What are you waiting out here for? Get inside before they start!")
+hss.dlgA(co,hss.U,"Start what?",4)
+hss.dlg(co,hss.BR,"As homage to my youthful spirit, they're playing my favorite childhood games in there. Go on, have a look!")
+hss.evt(co,"You and Hunt step past him into the den, and your jaw drops.", "")
+hss.dlgA(co,"THOMAS","What the--",4)
+hss.evt(co,"...several party-goers are participating in an egg-and-spoon relay race. Priya Singh is among them, her eyes wild and her jaw set with determination.", "")
+hss.dlgA(co,"PRIYA","Come on, losers! You're moving like you've never balanced an egg on a spoon with your teeth before!",3)
+hss.dlgA(co,hss.U,"Uh, didn't you say 'reserved and professional'?",4)
+hss.dlgA(co,"THOMAS","I might have completely forgotten about this side of her...",4)
+hss.dlg(co,hss.U,"Well, we're here. Let's go talk to her.")
+hss.evt(co,"You move toward Priya, but Hunt holds you back.", "")
+hss.dlgA(co,"THOMAS","Not ~now,~ {YOU}. The situation has changed. She's all about winning now.",3)
+hss.dlgA(co,hss.U,"So what are you suggesting? That I do the egg-and-spoon relay race with Priya Singh?",4)
+hss.dlg(co,"THOMAS","No. Not ~just~ you.")
+hss.evt(co,"Hunt begins rolling up his sleeves.", "")
+hss.dlgA(co,"THOMAS","We're ~both~ playing this game. And we're playing to win.",3)
+end
+function inter_compete(co)
+hss.evt(co,"After they greet each other, Priya goes to one side of the room to get ready for the race and Hunt pulls you aside.", "")
+hss.dlgA(co,"THOMAS","Priya won't stand for any distractions when she's in a competitive mood.",3)
+hss.dlgA(co,"THOMAS","I told her we'll be on her team. We'll have to win before trying to talk to her about 'Kingdom Come'.",3)
+hss.dlgA(co,"THOMAS","Do you know the rules of this game, {YOU}?",3)
+local choice = hss.showTextMenu(co, "What do you say?", "Yep! I'm a pro.|No. How do you play?");
+if (choice == 0) then
+hss.dlgA(co,hss.U,"I played this all the time when I was a kid.",1)
+hss.dlgA(co,"THOMAS","Good. You'll need that experience, because Priya won't listen to a word you say unless we win.",3)
+hss.evt(co,"A waiter circles the room, passing out a large spoon to each person and a chocolate egg to each team. Hunt crosses the room to join Priya, leaving you to get ready.", "")
+else
+hss.evt(co,"Hunt signals for a waiter, who gives you each a spoon and one chocolate egg for your team.", "")
+hss.dlgA(co,"THOMAS","Balance the egg on the spoon, and grip the spoon between your teeth. Priya will run the egg to you, you'll run it back to me, and I'll relay it back to Priya.",3)
+hss.dlg(co,hss.U,"Oh, yeah, that sounds familiar. I thought this game was played with ~real~ eggs, though. Why are we using chocolate ones?")
+hss.dlgA(co,"THOMAS","I suspect because they're neater, but that's besides the point. Focus, {YOU}.",3)
+hss.dlgA(co,"THOMAS","If we don't win with Priya, I highly doubt she'll listen to a word you say.",3)
+hss.dlg(co,hss.U,"Yeah, yeah. I got it. Run around with the egg, and don't drop it. Easy.")
+hss.evt(co,"Hunt crosses the room to join Priya, leaving you as the second runner.", "")
+end
+hss.evt(co,"As you bite down on your spoon's handle, Priya readies the egg on her spoon. At the sound of a shrill whistle, she gracefully speedwalks the egg across the room to you. Through gritted teeth, she whispers to you...", "")
+hss.dlgA(co,"PRIYA","{YOU}. I know what you want... but the competition comes first. Do ~not~ mess this up.",3)
+hss.dlgA(co,hss.U,"Just pass me the egg.",3)
+hss.evt(co,"Priya tips the egg onto your spoon, where it wobbles for a second... but you manage to stabilize it! Quickly, but carefully, you cross the room to Hunt and...", "")
+local choice = hss.showTextMenu(co, "What do you do?", "Pass the egg.|Drop the egg.|Get lost in his eyes.", true, 3);
+if (choice == 0) then
+hss.evt(co,"You smoothly slide the egg onto Hunt's spoon. He takes off back towards Priya, beating every other team as he gingerly deposits the egg back on her waiting spoon.", "")
+hss.dlgA(co,hss.BR,"Looks like we've got a winner!",1)
+hss.markQuestScriptRequirementFinished()
+elseif (choice == 2) then
+hss.evt(co,"You catch Hunt's gaze and find that you can't look away, mesmerized by his eyes...", "")
+hss.evt(co,"The egg slips off your spoon as you tilt your head. Its chocolate shell cracks against the floor!", "")
+hss.dlgA(co,hss.U,"Uh... oops?",4)
+hss.dlgA(co,"THOMAS","Focus, {YOU}.",3)
+hss.dlgA(co,hss.U,"It's not ~my~ fault you're stupid hot.",3)
+hss.dlgA(co,"THOMAS","Just go get another egg. Priya won't stop without a win.",3)
+else
+hss.evt(co,"Tense from gripping the spoon, you tremble and tip your head forward too soon! The egg slides off your spoon, its chocolate shell cracking against the floor.", "")
+hss.dlgA(co,hss.U,"Oops. My bad.",2)
+hss.dlgA(co,"THOMAS","Just go get another egg. Priya won't stop without a win.",3)
+end
+end
+function outro_prim_0045_birthday_4(co)
+hss.evt(co,"After the game, you cross the room to join Priya and Hunt. You put on a respectful smile as you greet Priya.", "")
+hss.dlgA(co,hss.U,"Good game, Professor Singh. If you have a moment, I'd like to talk to you about 'Kingdom Come'.",1)
+hss.dlgA(co,"PRIYA","I suspected as much. I'm in a good mood after that win, so you have sixty seconds.",3)
+hss.dlgA(co,hss.U,"Oh, uh... well, if you've seen the show, you know it's ~exactly~ what TV needs right now. The characters, the themes... they're ~revolutionary~.",4)
+hss.dlgA(co,"PRIYA","I agree.",3)
+hss.dlgA(co,hss.U,"You do? Then you know why we deserve an Emma nomination.",1)
+hss.dlgA(co,"PRIYA","Your show and your crew, perhaps. But I remain unconvinced ~you~ deserve such a nomination.",3)
+if hss.getCharacterGender("YOU") == hss.Gender.MALE then
+hss.dlgA(co,"PRIYA","The young man who faced expulsion from Hollywood U certainly doesn't deserve such an honor. How have you changed since then?",3)
+else
+hss.dlgA(co,"PRIYA","The young woman who faced expulsion from Hollywood U certainly doesn't deserve such an honor. How have you changed since then?",3)
+end
+hss.dlg(co,hss.U,"Well, I'm...")
+local choice = hss.showTextMenu(co, "What do you say?", "More professional.|Way hotter.");
+if (choice == 0) then
+hss.dlg(co,hss.U,"I don't get involved in petty feuds anymore. I've learned how to be a professional.")
+hss.dlgA(co,"PRIYA","I've yet to see any evidence of this.",3)
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward3") == nil then
+hss.setQuestProperty("reward3",1)
+hss.dlgA(co,hss.U,"Well, I'm here, aren't I? At Ratzik's birthday party? If I can play nice with him, I can play nice with anyone.",0,hss.REWARD_COINS,50)
+else
+hss.dlgA(co,hss.U,"Well, I'm here, aren't I? At Ratzik's birthday party? If I can play nice with him, I can play nice with anyone.",0)
+end
+hss.dlgA(co,"PRIYA","...perhaps you have a point. And it would be highly unprofessional of me to deny you a nomination based on our personal differences.",3)
+hss.dlgA(co,hss.U,"So... we can be friends?",1)
+hss.dlgA(co,"PRIYA","Absolutely not. But you ~do~ have my vote.",3)
+else
+hss.dlgA(co,hss.U,"Hollywood's been good to me. I've gone from being a bright-eyed newbie to a total red carpet showstopper, don't you think?",1)
+hss.dlgA(co,"PRIYA","That's completely irrelevant, not to mention incredibly inappropriate.",3)
+hss.dlgA(co,"THOMAS","{YOU} has a miserable sense of humor.",3)
+hss.dlgA(co,hss.U,"Hey!",3)
+hss.dlg(co,"THOMAS","But I must say, ill-timed comedy aside, {YOU} is a... tolerable producer.")
+if hss.tutorialIsQuestFinished("date_0019_dinner_6") then
+hss.evt(co,"Although Hunt is frowning, you grin back at him.", "")
+hss.dlgA(co,hss.U,"Tolerable? How sweet.",1)
+hss.evt(co,"Priya glances between the two of you, brow furrowing.", "")
+else
+hss.dlgA(co,hss.U,"~Tolerable?~ Gee, thanks.",3)
+hss.evt(co,"Priya frowns, and Hunt ignores your outburst.", "")
+end
+hss.dlgA(co,"THOMAS","You know me, Priya. I would never direct for a sub-par producer, or commit myself to a lackluster project.",3)
+hss.dlg(co,"PRIYA","I'm well aware. Your name is what drew me to give 'Kingdom Come' a chance in the first place...")
+hss.dlgA(co,"PRIYA","And you, beyond doubt, deserve an Emma, Thomas. You deserve anything your heart desires.",1)
+hss.evt(co,"Hunt and Priya share a meaningful look, held until Hunt looks away. A flash of sadness crosses Priya's face, but then she squares her shoulders and nods.", "")
+hss.dlgA(co,"PRIYA","Based on quality, and quality alone... 'Kingdom Come' will have my vote.",3)
+end
+hss.showQuestComplete(co)
+hss.evt(co,"After winning Priya's vote, you find Samantha in the main hall to tell her the good news.", "")
+hss.dlgA(co,hss.U,"Just one more committee member to woo, and that nomination is ours! Who's next?",1)
+hss.dlg(co,"SAMANTHA","Brian Ratzik.")
+hss.dlgA(co,hss.U,"You're ~kidding~ me.",2)
+hss.dlgA(co,hss.U,"We've got ~no~ chance. He practically helped raise Desiree! He'd never choose me over her, even if he's this new guy or whatever.",3)
+hss.dlgA(co,"SAMANTHA","We didn't come this far to give up now. We've already gotten Marianne and Priya. Ratzik's the last vote we need to get the nomination.",3)
+hss.dlgA(co,hss.U,"You're right. We have to at least try to get his vote away from Desiree. Where is he?",3)
+hss.dlg(co,"SAMANTHA","Grab a swimsuit, {YOU}. We're going hot tubbing with Brian Ratzik.")
+end
+function intro_prim_0045_birthday_5(co)
+hss.evt(co,"After you change, you follow Samantha out to the backyard. Glittering lights illuminate the trees, haloing a massive hot tub on the patio.", "")
+hss.evt(co,"Ratzik lounges inside the bubbling water, surrounded by bikini-clad starlets. His hands are submerged beneath the steaming surface, and you pull a disgusted face.", "")
+hss.dlgA(co,hss.U,"So much for your new leaf, Ratzik.",3)
+hss.dlgA(co,hss.BR,"This is all innocent fun, {YOU}, I assure you.",1)
+hss.dlgA(co,hss.U,"Yeah? Then where exactly are your hands?",3)
+hss.evt(co,"The girls around him giggle as Ratzik shifts... and he suddenly pulls out a huge, multi-colored water gun from beneath the surface, spraying you and Samantha with jets of hot water!", "")
+hss.dlgA(co,hss.U,"What the--",4)
+hss.dlgA(co,hss.BR,"See, {YOU}? Perfectly innocent.",1)
+hss.dlgA(co,hss.U,"Okay, so you've gone from sleazy to ~childish~.",3)
+hss.dlg(co,hss.U,"Still an improvement, I guess.")
+hss.dlgA(co,hss.BR,"Please, join us. I won't bite, Miss Valmont. Unless you ~want~ me to.",1)
+hss.dlgA(co,"SAMANTHA","Nope.",3)
+hss.evt(co,"Ratzik takes a deep, steadying breath, and mumbles under his breath...", "")
+hss.dlg(co,hss.BR,"Be the best me... be the best me...")
+hss.evt(co,"Just then, Desiree slips into the hot tub, settling down on Brian's side and facing you with a smile.", "")
+hss.dlgA(co,"DESIREE","If you're here for Brian's Emma nomination, don't bother. He's already promised his vote to 'Prohibition'.",1)
+end
+function outro_prim_0045_birthday_5(co)
+hss.evt(co,"You and Samantha cautiously step into the hot tub, sitting across from Ratzik and Desiree. You shoot Desiree a glare.", "")
+hss.dlgA(co,hss.U,"What makes 'Prohibition' more worthy of your nomination than my show, Ratzik?",3)
+hss.dlg(co,hss.BR,"Desiree's show blew me away, and not just because she's practically family.")
+hss.dlgA(co,hss.BR,"Truth be told, I haven't even seen your show.",1)
+hss.dlgA(co,hss.U,"That's even ~worse~!",4)
+hss.dlgA(co,hss.U,"Ratzik...",3)
+local choice = hss.showTextMenu(co, "What do you say?", "The new you wouldn't play favorites!|You owe me that nomination!");
+if (choice == 0) then
+hss.dlg(co,hss.U,"Anyone can see you're trying to turn over a new leaf. You've been respectful to your guests at what I have to admit is a ~very~ tasteful party.")
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward4") == nil then
+hss.setQuestProperty("reward4",1)
+hss.dlgA(co,hss.U,"If you're a changed man, you'll give my show a chance.",0,hss.REWARD_COINS,50)
+else
+hss.dlgA(co,hss.U,"If you're a changed man, you'll give my show a chance.",0)
+end
+hss.dlg(co,hss.BR,"Hm... maybe I should watch an episode before writing it off.")
+hss.dlg(co,hss.U,"Thanks, Ratzik. That's pretty much the ~least~ you could do... but thanks.")
+else
+hss.dlg(co,hss.U,"I mean, I found the guy who ran you over with his car! That's gotta be worth something.")
+hss.dlgA(co,hss.U,"And after all you've put me and my friends through, you ~have~ to make it up to us with this nomination.",3)
+hss.dlgA(co,"SAMANTHA","{YOU}. Shut up.",3)
+hss.evt(co,"Samantha glares at you before turning to Ratzik with a disarming smile.", "")
+hss.dlg(co,"SAMANTHA","It's been a while since we've worked together, Brian. I barely recognize you anymore.")
+hss.dlgA(co,"SAMANTHA","And I mean that as a compliment. You've reinvented yourself, successfully.",1)
+hss.dlgA(co,hss.BR,"That ~is~ my goal.",1)
+hss.dlg(co,"SAMANTHA","It shows. You've thrown a very tasteful party tonight, where you've been nothing but respectful for your fans. The new Brian Ratzik is, without doubt, here.")
+hss.dlgA(co,"SAMANTHA","And would the new Brian Ratzik select an Emma nomination without reviewing every show fairly?",3)
+hss.dlgA(co,hss.BR,"I... suppose not. Maybe I should watch an episode of {YOU}'s show before writing it off.",4)
+hss.dlg(co,hss.U,"Well, yeah. That's basically the ~least~ you could do.")
+end
+hss.dlg(co,"DESIREE","Whatever. Go ahead and watch {YOU}'s show if you want, Brian.")
+hss.dlgA(co,"DESIREE","You'll still think ~mine~ is better.",1)
+hss.showQuestComplete(co)
+hss.evt(co,"As you leave Ratzik's party, Samantha and Ethan both check their phones constantly for news about the nominations.", "")
+if (choice == 0) then
+hss.dlg(co,"SAMANTHA","Nice work back there, {YOU}. You played Ratzik like a fiddle.")
+hss.dlgA(co,hss.U,"Hey, just doing my job.",1)
+else
+hss.dlgA(co,hss.U,"Thanks for the save, Samantha. I guess I shouldn't have blown up at Ratzik back there.",2)
+hss.dlg(co,"SAMANTHA","Don't mention it.")
+hss.dlgA(co,"SAMANTHA","Literally don't mention it. I get pissed off just thinking about how you behaved.",3)
+end
+hss.dlg(co,hss.E,"We've been reaching out to the nominations committee, and it sounds like they're still split between your show and Desiree's.")
+hss.dlgA(co,hss.E,"I hate to say it, but we're relying on Ratzik's vote.",3)
+hss.dlg(co,"SAMANTHA","We've done all we can. We'll know if we got it when the nominations are announced tomorrow morning...")
+hss.dlg(co,hss.U,"I doubt I'll be able to sleep at all tonight.")
+hss.dlgA(co,hss.U,"So how about we keep this party going?",1)
+end
+function outro_prim_0045_birthday_6(co)
+hss.evt(co,"You and your entourage hit the town after Ratzik's party, dancing the night away at Blitz.", "")
+hss.evt(co,"Hours later, near closing time, you slide into one of the VIP booths with a long yawn, leaning your head against Ethan's shoulder.", "")
+hss.dlgA(co,hss.U,"So... tired...",2)
+hss.evt(co,"Suddenly, Samantha bolts up from where she was slouched over the bar.", "")
+hss.dlgA(co,"SAMANTHA","The nominations are out.",3)
+hss.dlgA(co,hss.U,"Did we make it?",4)
+hss.dlg(co,hss.E,"We got the Best Actress and Best Costume Design nominations. Congratulations, Addison.")
+hss.dlgA(co,hss.A,"Oh my gosh! I'm up for ~two~ Emmas?",4)
+hss.dlgA(co,hss.U,"You deserve them both, Addi.",1)
+hss.dlgA(co,"SAMANTHA","I've got the Best Drama nominations here.",3)
+hss.dlg(co,"SAMANTHA","'Bear and Bull', 'Undertow', and 'Binary Numbers'... the first three are all as we expected. They had their nominations locked down ages ago.")
+hss.dlgA(co,hss.E,"Take a look at number four, {YOU}.",4)
+hss.evt(co,"You lean in closer and read 'Best Drama Nominees' on the screen of his phone...", "")
+hss.dlgA(co,hss.U,"'Kingdom Come'!",4)
+hss.dlgA(co,hss.U,"We made it!",5)
+hss.evt(co,"Dozens of your friends who stayed up to wait with you burst out into cheers, rushing over to congratulate you on your nominations.", "")
+hss.dlgA(co,hss.U,"We haven't won yet, but we're on our way!",1)
+hss.showQuestComplete(co)
+hss.evt(co,"Through the crowd of your friends, you see Samantha still frowning at her phone.", "")
+hss.dlgA(co,hss.U,"What's wrong, Samantha?",4)
+hss.dlgA(co,"SAMANTHA","The fifth nominee... is 'Prohibition'.",3)
+hss.dlgA(co,hss.E,"Desiree's show? But I thought that military hacker drama 'Code of Silence' was getting a nomination for sure.",4)
+hss.dlgA(co,"SAMANTHA","Desiree must have swayed some committee members to vote for her.",3)
+hss.dlgA(co,hss.U,"Me against Des, ~again~?",3)
+hss.dlgA(co,hss.U,"Fine. But this time ~I'm~ coming out on top.",3)
+hss.evt(co,"Will you and Desiree be able to play nice at the Emmas? Whose show will take home the coveted Best Drama award?", "")
+hss.evt(co,"Keep playing to find out!", "")
+end
+local sceneTable = {}
+sceneTable["outro_prim_0045_birthday_1"] = outro_prim_0045_birthday_1
+sceneTable["intro_prim_0045_birthday_2"] = intro_prim_0045_birthday_2
+sceneTable["outro_prim_0045_birthday_2"] = outro_prim_0045_birthday_2
+sceneTable["intro_prim_0045_birthday_3"] = intro_prim_0045_birthday_3
+sceneTable["outro_prim_0045_birthday_3"] = outro_prim_0045_birthday_3
+sceneTable["inter_compete"] = inter_compete
+sceneTable["outro_prim_0045_birthday_4"] = outro_prim_0045_birthday_4
+sceneTable["intro_prim_0045_birthday_5"] = intro_prim_0045_birthday_5
+sceneTable["outro_prim_0045_birthday_5"] = outro_prim_0045_birthday_5
+sceneTable["outro_prim_0045_birthday_6"] = outro_prim_0045_birthday_6
+hss.runScene(sceneTable)

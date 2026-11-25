@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.pixelberrystudios.hwuandroid" platformBuildVersionCode="25" platformBuildVersionName="7.1.1">
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <permission android:name="com.pixelberrystudios.hwuandroid.gcm.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+    <uses-permission android:name="com.pixelberrystudios.hwuandroid.gcm.permission.C2D_MESSAGE"/>
+    <uses-feature android:glEsVersion="0x10001" android:required="true"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+    <supports-screens android:largeScreens="true" android:normalScreens="true" android:smallScreens="false"/>
+    <meta-data android:name="android.support.VERSION" android:value="25.3.0"/>
+    <uses-feature android:glEsVersion="0x20000" android:required="true"/>
+    <queries>
+        <package android:name="com.android.vending"/>
+        <package android:name="com.facebook.katana"/>
+        <package android:name="com.facebook.orca"/>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="http"/>
+        </intent>
+    </queries>
+    <application android:allowBackup="true" android:extractNativeLibs="true" android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:name="com.pixelberrystudios.hwuandroid.HWUApp" android:preserveLegacyExternalStorage="true" android:requestLegacyExternalStorage="true" android:theme="@style/Theme.NoTitleBar.FullScreen" android:usesCleartextTraffic="true">
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        <meta-data android:name="PROJ_HWU" android:value="true"/>
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/app_name" android:launchMode="singleTop" android:name="com.pixelberrystudios.hwuandroid.HWUNativeActivity" android:screenOrientation="sensorLandscape" android:theme="@style/Theme.NoTitleBar.FullScreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="navigate" android:scheme="hollywoodu"/>
+            </intent-filter>
+        </activity>
+        <receiver android:name="com.pixelberrystudios.hssandroid.NotificationsHelper$NotificationReceiver"/>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
+        <meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/google_app_id"/>
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="c2930009e6ae12d577053b06e3eae11c9a39ea1e"/>
+        <meta-data android:name="applovin.sdk.key" android:value="f7tGWEs1XehoWAWGM_lx8PVfsl4lvqATy1pSFfUnJATqL44i4peCD8t3txpnmzJh-79Dnd_4pTv9dzshnVv-dm"/>
+        <meta-data android:name="KTPLAY_REGION" android:value="Global"/>
+        <activity android:name="com.facebook.LoginActivity" android:screenOrientation="portrait"/>
+        <activity android:configChanges="orientation|screenSize" android:hardwareAccelerated="true" android:name="com.sponsorpay.publisher.mbe.SPBrandEngageActivity"/>
+        <receiver android:exported="true" android:name="com.pixelberrystudios.hssandroid.HSSBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
+            </intent-filter>
+            <meta-data android:name="forward.kochava" android:value="com.kochava.android.tracker.ReferralCapture"/>
+        </receiver>
+        <receiver android:exported="true" android:name="com.leanplum.GcmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+                <category android:name="com.pixelberrystudios.hssandroid.gcm"/>
+            </intent-filter>
+        </receiver>
+        <service android:name="com.leanplum.LeanplumPushService"/>
+        <activity android:name="com.applovin.adview.AppLovinInterstitialActivity"/>
+        <activity android:name="com.applovin.adview.AppLovinConfirmationActivity"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize" android:excludeFromRecents="true" android:name="com.chartboost.sdk.CBImpressionActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:name="com.jirbo.adcolony.AdColonyOverlay" android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:name="com.jirbo.adcolony.AdColonyFullscreen" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:name="com.jirbo.adcolony.AdColonyBrowser" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"/>
+        <meta-data android:name="AdjustAppToken" android:value="d9zbkhrugxn3"/>
+        <meta-data android:name="AdjustLogLevel" android:value="warn"/>
+        <meta-data android:name="AdjustEnvironment" android:value="production"/>
+        <meta-data android:name="FYBVideoPlayerOptionCloseButtonDelay" android:value="600"/>
+        <activity android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" android:name="com.google.android.gms.ads.AdActivity" android:theme="@android:style/Theme.Translucent"/>
+        <activity android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity" android:theme="@style/Theme.IAPTheme"/>
+        <activity android:exported="true" android:name="com.google.android.gms.appinvite.PreviewActivity" android:theme="@style/Theme.AppInvite.Preview">
+            <intent-filter>
+                <action android:name="com.google.android.gms.appinvite.ACTION_PREVIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:excludeFromRecents="true" android:exported="false" android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <service android:exported="true" android:name="com.google.android.gms.auth.api.signin.RevocationBoundService" android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"/>
+        <provider android:authorities="com.pixelberrystudios.hwuandroid.google_measurement_service" android:exported="false" android:name="com.google.android.gms.measurement.AppMeasurementContentProvider"/>
+        <receiver android:enabled="true" android:exported="true" android:name="com.google.android.gms.measurement.AppMeasurementReceiver">
+            <intent-filter>
+                <action android:name="com.google.android.gms.measurement.UPLOAD"/>
+            </intent-filter>
+        </receiver>
+        <service android:enabled="true" android:exported="false" android:name="com.google.android.gms.measurement.AppMeasurementService"/>
+        <activity android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize" android:name="com.facebook.FacebookActivity" android:theme="@style/com_facebook_activity_theme"/>
+        <activity android:name="com.facebook.CustomTabMainActivity"/>
+        <provider android:authorities="com.pixelberrystudios.hwuandroid.FacebookInitProvider" android:exported="false" android:name="com.facebook.internal.FacebookInitProvider"/>
+        <activity android:configChanges="locale|orientation|screenSize|layoutDirection" android:label="@string/hs__conversation_header" android:name="com.helpshift.HSConversation" android:theme="@style/Helpshift.Theme.Activity"/>
+        <activity android:configChanges="orientation|screenSize" android:name="com.helpshift.HSQuestionsList" android:theme="@style/Helpshift.Theme.Activity"/>
+        <activity android:configChanges="orientation|screenSize" android:hardwareAccelerated="true" android:label="@string/hs__question_header" android:name="com.helpshift.HSQuestion" android:theme="@style/Helpshift.Theme.Activity"/>
+        <activity android:configChanges="orientation|screenSize" android:hardwareAccelerated="true" android:name="com.helpshift.HSSection" android:theme="@style/Helpshift.Theme.Activity" android:windowSoftInputMode="adjustPan"/>
+        <activity android:configChanges="orientation|screenSize" android:hardwareAccelerated="true" android:label="@string/hs__help_header" android:name="com.helpshift.HSFaqs" android:theme="@style/Helpshift.Theme.Activity" android:windowSoftInputMode="adjustPan"/>
+        <activity android:configChanges="orientation|screenSize" android:name="com.helpshift.HSReview" android:theme="@style/Helpshift.Theme.Dialog"/>
+        <activity android:configChanges="orientation|screenSize" android:name="com.helpshift.ScreenshotPreviewActivity" android:theme="@style/Helpshift.Theme.Activity"/>
+        <activity android:configChanges="orientation|screenSize" android:name="com.helpshift.SearchResultActivity" android:theme="@style/Helpshift.Theme.Activity"/>
+        <service android:label="Helpshift Service" android:name="com.helpshift.HSService"/>
+        <service android:label="Helpshift Service" android:name="com.helpshift.HSRetryService"/>
+        <activity android:hardwareAccelerated="false" android:name="com.amazon.ags.html5.overlay.GameCircleUserInterface" android:theme="@style/GCOverlay"/>
+        <activity android:hardwareAccelerated="false" android:name="com.amazon.ags.html5.overlay.GameCircleAlertUserInterface" android:theme="@style/GCAlert"/>
+    </application>
+</manifest>

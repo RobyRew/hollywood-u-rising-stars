@@ -16,17 +16,17 @@ This repository does **not** contain the game. Hollywood U is copyright Pixelber
 | Server-time bypass | Startup calls `android-api-live.playhollywoodu.com`, which no longer exists. That is the Offline dialog. The patch uses the phone clock and continues. |
 | Store, rings, and coins offline | `canPurchase`, `hasProduct`, and `areProductsAvailable` no longer depend on Google Play. Buying `hwu_rings_*` adds rings and `hwu_coins_*` adds coins straight into the local save. No account and no network. |
 | Currency and clothing tabs | The “Network error. Cannot access currency store” path is skipped. The clothing tab’s matching network error is skipped too. |
-| Level and quest locks | Store items, buildings, clothes, makeovers, classes, and campus plots no longer check level or quest requirements. Lock badges are forced off. |
+| Quests | Quest requirements, the tutorial, and lock checks stay on the game's own logic. |
 | Admissions office | Recruiting is no longer blocked by the “office is full” check. |
-| RR gear | A blue gear in the HUD column opens RR Mod Settings: 10,000,000 cash, 10,000,000 diamonds, 5,000,000 XP, export, and import. It stays up while the game’s own settings dialog is open. |
-| Quest bypass | A started quest treats its requirements as done, and a character slot accepts the character you send. Open the quest and tap it to collect. |
-| HUD plus buttons | The cash and diamond plus buttons each add 10,000,000. |
+| RR gear | A blue gear opens RR Mod Settings for cash, diamonds, XP, export, and import. Those grants add currency. They do not skip a quest step. |
+| Acceptance letter | The first-run letter does not wait for a tap. The rest of a new game, including quests and the shop, still runs. |
+| HUD plus buttons | The cash and diamond plus buttons open the store. The settings panel is what adds 10,000,000. |
 | Skip tutorial | `startTutorial` and later tutorial triggers return immediately, and the “tutorial is active” check stays false, so a half-finished tutorial does not lock the campus. |
 | Save export and import | Export writes the real `files/`, `shared_prefs/`, and `databases/` data into a `.hollywoodujson` file. Import puts those bytes back and restarts the game. |
 
 In the game, rings are the premium currency (the code calls them hearts) and coins are cash. Books are stars.
 
-A store product id such as `hwu_rings_1490` or `hwu_coins_5000` still grants the number in the id. The gear menu and the HUD plus buttons grant 10,000,000 cash or diamonds on their own path.
+A store product id such as `hwu_rings_1490` or `hwu_coins_5000` grants the number in the id. The gear menu can also add 10,000,000 cash or diamonds.
 
 ## Requirements
 
@@ -62,9 +62,9 @@ python3 patcher/patch_apk.py --apk game.apk --out ~/Desktop/HollywoodU-offline.a
 2. If an older copy is installed and Android refuses the update, uninstall that copy first. A new signature cannot replace a different one.
 3. Play Protect will say it has not seen this developer. That is the local signing key. Choose **Install anyway**.
 4. Open the game. If a later dialog offers a local or new game, take it. The campus and the content shipped inside the APK run from the phone.
-5. Tap the blue gear under the hide button for RR Mod Settings. The cash and diamond plus buttons on the top bar each add 10,000,000.
-6. Open a quest and tap it. Requirements are treated as done, so the game’s own collect button pays the reward and moves the chain on.
-7. Open the store from the ring or coin button and buy a pack. The amount in the product id is added, and the purchase also adds 10,000,000 cash and 10,000,000 diamonds. Locked cards can be bought without the level or quest.
+5. Tap the blue gear for RR Mod Settings when you want to add cash, diamonds, or XP. Quests, the tutorial, and building moves stay on the game's own logic.
+6. The cash and diamond plus buttons open the store. Buying a pack adds the amount in its product id, with no Google account and no network.
+7. The acceptance letter does not wait for a tap. The next tutorial step still runs.
 
 ## Phones it cannot run on
 

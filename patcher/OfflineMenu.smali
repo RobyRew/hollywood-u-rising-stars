@@ -3,6 +3,10 @@
 .source "OfflineMenu.java"
 
 
+# static fields
+.field public static flags:I
+
+
 # direct methods
 .method private constructor <init>()V
     .locals 0
@@ -26,7 +30,7 @@
 .end method
 
 .method public static show(Landroid/app/Activity;)V
-    .locals 6
+    .locals 11
 
     new-instance v0, Landroid/app/Dialog;
 
@@ -102,7 +106,7 @@
 
     invoke-direct {v2, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
 
-    const-string v3, "Quest requirements are bypassed. Open a quest and tap it to collect."
+    const-string v3, "Quests and the shop use the game's own rules. Store buys work with no account and no network."
 
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
 
@@ -296,6 +300,131 @@
     iput v3, v2, Landroid/view/ViewGroup$MarginLayoutParams;->topMargin:I
 
     invoke-virtual {v0, v1, v2}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    return-void
+.end method
+
+.method public static flags()I
+    .locals 1
+
+    sget v0, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->flags:I
+
+    return v0
+.end method
+
+.method public static load(Landroid/app/Activity;)V
+    .locals 4
+
+    const-string v0, "rr"
+
+    const/4 v1, 0x0
+
+    invoke-virtual {p0, v0, v1}, Landroid/app/Activity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object p0
+
+    const-string v0, "tutorial"
+
+    invoke-interface {p0, v0, v1}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v0
+
+    const-string v2, "quest"
+
+    invoke-interface {p0, v2, v1}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v2
+
+    const-string v3, "unlock"
+
+    invoke-interface {p0, v3, v1}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result p0
+
+    if-eqz v0, :no_tutorial
+
+    const/4 v1, 0x1
+
+    :no_tutorial
+    if-eqz v2, :no_quest
+
+    or-int/lit8 v1, v1, 0x2
+
+    :no_quest
+    if-eqz p0, :store
+
+    or-int/lit8 v1, v1, 0x4
+
+    :store
+    sput v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->flags:I
+
+    invoke-static {}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->apply()V
+
+    return-void
+.end method
+
+.method public static apply()V
+    .locals 1
+
+    const/4 v0, 0x4
+
+    invoke-static {v0}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu;->grantKind(I)V
+
+    return-void
+.end method
+
+.method private static switchRow(Landroid/app/Activity;Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    .locals 4
+
+    new-instance v0, Landroid/widget/Switch;
+
+    invoke-direct {v0, p0}, Landroid/widget/Switch;-><init>(Landroid/content/Context;)V
+
+    invoke-virtual {v0, p2}, Landroid/widget/Switch;->setText(Ljava/lang/CharSequence;)V
+
+    const/4 v1, -0x1
+
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setTextColor(I)V
+
+    const/high16 v1, 0x41800000    # 16.0f
+
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setTextSize(F)V
+
+    const-string v1, "rr"
+
+    const/4 v2, 0x0
+
+    invoke-virtual {p0, v1, v2}, Landroid/app/Activity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+
+    move-result-object v1
+
+    invoke-interface {v1, p3, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+
+    move-result v1
+
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setChecked(Z)V
+
+    new-instance v1, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Toggle;
+
+    invoke-direct {v1, p0, p3, p4}, Lcom/pixelberrystudios/hwuandroid/OfflineMenu$Toggle;-><init>(Landroid/app/Activity;Ljava/lang/String;I)V
+
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+
+    new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
+
+    const/4 v2, -0x1
+
+    const/4 v3, -0x2
+
+    invoke-direct {v1, v2, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+
+    const/16 v2, 0x12
+
+    iput v2, v1, Landroid/view/ViewGroup$MarginLayoutParams;->topMargin:I
+
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setLayoutParams(Landroid/view/ViewGroup$LayoutParams;)V
+
+    invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     return-void
 .end method

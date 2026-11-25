@@ -1,0 +1,445 @@
+function inter_preview(co)
+hss.evt(co,"One Saturday morning, Ethan is driving you to a new gig in downtown L.A.", "")
+hss.dlgA(co,hss.E,"Guess what my favorite client is doing today?",7)
+hss.dlg(co,hss.U,"I don't know, because ~someone~ wouldn't tell me until I was in the Porsche.")
+hss.dlg(co,hss.E,"That's because I wanted it to be a surprise... you're auditioning for the best dance competition show around, ~Break a Leg.~")
+local choice = hss.showTextMenu(co, "What do you say?", "Dancing's not really my thing.|I LOVE dancing!");
+if (choice == 0) then
+hss.dlg(co,hss.E,"Noted. But guess what you're ~still~ doing today?")
+hss.dlg(co,hss.U,"Dancing?")
+hss.dlgA(co,hss.E,"Did I mention you're my favorite client?",7)
+hss.dlgA(co,hss.U,"You could stand to mention it a little more often.",1)
+else
+hss.dlgA(co,hss.U,"I'm gonna ~kill it~ on the dance floor!",1)
+hss.dlgA(co,hss.E,"That's what I like to hear.",1)
+end
+hss.dlg(co,hss.E,"Now, this show has been a huge stepping stone for tons of celebrities... it's just one of many ways we're gonna turn you into a household name.")
+hss.dlg(co,hss.E,"Showing everyone you're a good sport and willing to work hard will definitely keep the public on your side. Plus, you can show off your dancing skills and win yourself an all-expenses paid Caribbean cruise!")
+hss.evt(co,"Ethan pulls up outside the studio and hands you the necessary paperwork.", "")
+hss.dlgA(co,hss.E,"Just make sure you put on a good face for the cameras. Make America love you.",7)
+hss.dlgA(co,hss.U,"Will do, boss.",1)
+hss.evt(co,"Several hours later, you've auditioned in front of the judges and are waiting to find out the results...", "")
+if hss.tutorialIsQuestFinished("premium_0006_harrison_1") then
+hss.evt(co,"As you walk out on stage with the crowd of contestants, you see Harrison Byrd already waiting center stage, smiling broadly at the cameras. He spots you in the crowd and winks.", "")
+else
+hss.evt(co,"As you walk out on stage with the crowd of contestants, you see the show's host already waiting center stage, smiling broadly at the cameras.", "")
+end
+hss.dlgA(co,"HARRISON","Welcome back, folks. For those of you just joining us, I'm Harrison Byrd, and this is ~Break a Leg.~",1)
+hss.dlg(co,"HARRISON","Fifty ambitious young celebs tried out, hoping to win that big trophy and a dream vacation, but the judges have chosen only five pairs to move on to the next round...")
+hss.dlgA(co,hss.U,"Pairs? Ethan didn't mention ~pairs...~",4)
+hss.dlgA(co,"HARRISON","The first lucky couple is... {YOU} and Bianca Stone!",1)
+hss.dlgA(co,hss.U,"What?",4)
+hss.dlgA(co,hss.B,"~What?!~",3)
+hss.evt(co,"Bianca emerges from the back of the group of contestants. You notice a producer motioning for a close up of the two of you.", "")
+hss.evt(co,"You remember what Ethan said about putting on a good face for the camera, and you force yourself to smile.", "")
+hss.dlgA(co,hss.U,"I mean, Bianca! Wonderful! I'm ~thrilled~ to be partnered with a familiar face.",1)
+hss.dlgA(co,hss.B,"Er, not as thrilled as me!",1)
+hss.evt(co,"You put your arm around her, barely touching her shoulder. As soon as the cameras refocus on Harrison, Bianca shakes your arm off and pulls you backstage.", "")
+hss.dlgA(co,hss.B,"{YOU}. Of ~course~ you'd be here. You just have to ruin everything, don't you?",3)
+hss.dlgA(co,hss.U,"Believe me, I had no idea you'd be here, or that we'd have to work together.",3)
+hss.dlgA(co,hss.B,"Yeah, well, the producers obviously figured out we hate each other and wanted to maximize the drama.",3)
+hss.dlgA(co,hss.B,"But, as much as I hate to admit it... you've got moves, and for whatever reason, people actually like you.",3)
+hss.dlgA(co,hss.U,"Did you just... ~compliment me?~",4)
+hss.dlgA(co,hss.B,"Don't get used to it.",3)
+hss.dlgA(co,hss.B,"Look, it's just a dance comp. What do you ~think~ is gonna happen?",3)
+hss.dlgA(co,hss.U,"Nothing!",4)
+hss.dlgA(co,hss.B,"Exactly. And we might actually have a chance at this thing. I mean, with ~my~ star power, how could we lose?",3)
+hss.dlgA(co,hss.U,"Those are some... interesting arguments there.",4)
+hss.dlgA(co,hss.B,"I can't believe I'm asking you this, {YOU}, but... do you want to be my partner?",3)
+local choice = hss.showTextMenu(co, "What do you say to Bianca?", "I'm in.|Never!");
+if (choice == 0) then
+hss.dlgA(co,hss.U,"But you can't pull any of your usual tricks, okay?",3)
+hss.dlgA(co,hss.B,"~You'd~ better not make me look like an idiot, {YOU}. I've been dancing since I was three. My dad wanted to make sure I'd be as poised as my sister...",3)
+hss.dlgA(co,hss.B,"But that doesn't matter! What matters is I've got my eye on that cruise, and I'm gonna win it.",3)
+hss.markQuestScriptRequirementFinished()
+else
+hss.dlgA(co,hss.U,"~Nothing's~ worth having to spend time with ~you.~",3)
+hss.dlgA(co,hss.U,"Think about it, Bianca. We'd have to work together ~very~ closely... probably even learn stuff about each other. Can you imagine that torture?",3)
+hss.dlgA(co,hss.B,"Yeah... I can imagine.",2)
+hss.dlgA(co,hss.U,"I'm saving us both from that mess. Frankly, I'm surprised you were willing to go along with it.",3)
+hss.dlgA(co,hss.B,"~Hello,~ the prize is a Caribbean cruise!",3)
+hss.dlgA(co,hss.B,"But whatever. Being disqualified is way better than spending another second with you!",3)
+hss.evt(co,"Bianca storms off.... and you can't help but wonder what it would've been like to be on the show with Bianca...", "")
+hss.dlgA(co,hss.U,"I guess I'll never know...",2)
+end
+end
+function outro_date_0026_bianca_1(co)
+hss.evt(co,"You and Bianca return to the stage as Harrison finishes up announcing the other pairs.", "")
+hss.dlgA(co,"HARRISON","Now that you're all partnered up, it's time to impress the judges with your chemistry.",1)
+hss.dlgA(co,hss.U,"What? But we haven't practiced together yet!",4)
+hss.dlgA(co,"HARRISON","Exactly! Rule #2: Always be ready. Any night could be the night of your life.",7)
+hss.dlgA(co,"HARRISON","Or in this case, any night can be an elimination round of the dance competition.",1)
+hss.showQuestComplete(co)
+hss.evt(co,"While the first couple takes the stage, you and Bianca go over the steps. As you practice, Bianca stops suddenly, causing you to stumble over her feet.", "")
+hss.dlgA(co,hss.B,"Stop sucking, {YOU}!",3)
+hss.dlgA(co,hss.U,"Thanks for the helpful criticism, Bianca. Got any more words of wisdom?",3)
+hss.dlgA(co,hss.B,"You're standing too close!",3)
+hss.dlgA(co,hss.U,"If I stand any farther away, I can't put my arms around you.",3)
+hss.dlgA(co,hss.B,"Good.",3)
+hss.evt(co,"You can hear Harrison announce you from onstage...", "")
+hss.dlgA(co,"HARRISON","Next up... it's {YOU} and Bianca.",1)
+hss.dlgA(co,hss.U,"This is going to be a disaster...",3)
+end
+function outro_date_0026_bianca_2(co)
+hss.evt(co,"The audience claps politely as you and Bianca take center stage. You're more nervous than you expected as the song starts...", "")
+hss.dlgA(co,hss.B,"What are you doing, {YOU}? Dance!",3)
+hss.dlgA(co,hss.U,"Right!",4)
+hss.evt(co,"You grab Bianca's hand and take a step closer... but land on her foot!", "")
+hss.dlgA(co,hss.B,"Ow ow ow!",4)
+hss.dlg(co,"HARRISON","Ooooo... that's gotta hurt! Remember, folks, Rule #56: Think fast. Act faster.")
+hss.dlgA(co,hss.U,"Sorry!",4)
+hss.evt(co,"You struggle to stay in-sync with Bianca through the rest of the steps... finally, it's time for the last big move.", "")
+hss.dlgA(co,hss.B,"Don't mess this up, {YOU}. You ~have~ to catch me.",3)
+hss.dlgA(co,hss.U,"Yeah, yeah. Just get on with it.",3)
+hss.evt(co,"You spin Bianca out away from you, and she does a beautiful series of turns.", "")
+hss.evt(co,"You reach out to her and...", "")
+local choice = hss.showTextMenu(co, "What do you do?", "Grab her hand!|Grab her face!", true, 3);
+if (choice == 0) then
+hss.evt(co,"You firmly grab Bianca's hand, spinning her right into your embrace! The two of you freeze as the music stops, your faces just a breath away from each other.", "")
+hss.evt(co,"You notice how close she is... how perfectly she fits in your arms... how ~natural~ it all feels, to hold her like this...", "")
+if hss.getArgument("QUEST_ID") ~= nil and hss.getQuestProperty("reward0") == nil then
+hss.setQuestProperty("reward0",1)
+hss.dlgA(co,hss.B,"You finally did something right.",3,hss.REWARD_COINS,25)
+else
+hss.dlgA(co,hss.B,"You finally did something right.",3)
+end
+hss.dlgA(co,hss.U,"Uh, thanks!",4)
+elseif (choice == 1) then
+hss.evt(co,"You miss Bianca's outstretched hand, grasping at her face instead!", "")
+hss.dlgA(co,hss.B,"Huh?",4)
+hss.evt(co,"Bianca quickly adjusts, placing her cheek into your palm so it looks like a loving caress as she spins into your arms. The two of you freeze as the music stops, your faces just a breath away...", "")
+hss.evt(co,"You notice how close she is... how perfectly she fits in your arms... how ~right~ it all feels, to hold her like this...", "")
+hss.dlgA(co,hss.B,"Smooth moves, {YOU}. You're lucky I saved you.",3)
+hss.dlgA(co,hss.U,"Right, uh, sorry.",4)
+else
+hss.evt(co,"You stand there, unsure...", "")
+hss.dlgA(co,hss.B,"{YOU}!",3)
+hss.evt(co,"Bianca grabs your arm and spins under it, guiding you into the proper position. The two of you freeze as the music stops, your faces just a breath away...", "")
+hss.evt(co,"You notice how close she is... how well she fits in your arms... how ~right~ it all feels, to hold her like this...", "")
+hss.dlgA(co,hss.B,"What was that? Did you forget your brain backstage?",3)
+hss.dlgA(co,hss.U,"Right, uh, sorry.",4)
+end
+hss.evt(co,"After a moment... the audience bursts into applause!", "")
+hss.dlgA(co,"HARRISON","Sounds like the crowd is impressed by your final moves there, {YOU}, Bianca. But will it be enough to get you to the next round?",1)
+hss.evt(co,"After a quick discussion, the judges hand Harrison an envelope.", "")
+hss.dlg(co,"HARRISON","You've scored 76 out of 100 points. That puts you right in the middle of the five teams, which means...")
+hss.dlgA(co,"HARRISON","You've made it to the Final Dance tomorrow night! Congratulations!",1)
+hss.showQuestComplete(co)
+hss.evt(co,"Backstage, Bianca whirls on you.", "")
+hss.dlgA(co,hss.B,"What are you trying to pull here, {YOU}? Are you ~trying~ to make us look like idiots?",3)
+if (choice == 0) then
+hss.dlgA(co,hss.U,"Hey, I hit the last move, didn't I?",3)
+hss.dlgA(co,hss.B,"Barely.",3)
+else
+hss.dlgA(co,hss.U,"Hey, it wasn't ~that~ bad.",3)
+hss.dlgA(co,hss.B,"Yeah, because ~I~ saved it at the end.",3)
+end
+hss.dlgA(co,hss.B,"If we're going to win, and we ~are~ going to win, then we have a ~lot~ of practicing to do before the Final Dance.",3)
+hss.dlgA(co,hss.B,"I'm not letting ~you~ stop me from winning that cruise!",3)
+end
+function inter_rehearse(co)
+local lift;
+hss.evt(co,"Later, you and Bianca rehearse in an empty dance studio on campus late into the night...", "")
+hss.dlgA(co,hss.B,"{YOU}, come ~on!~ The Final Dance is tomorrow! We have to nail this. Unless, of course, you don't think you can keep up...",3)
+hss.dlgA(co,hss.U,"Trust me, I can keep up.",3)
+hss.dlgA(co,hss.B,"Fine. Then all I'm asking for is an overhead lift with a flip on the way down, ending with a spin move. Easy.",3)
+hss.dlgA(co,hss.U,"Yeah, ~so~ easy. Can you even lift me over your head?",3)
+hss.dlgA(co,hss.B,"Who said ~I'm~ doing the lifting?",3)
+local choice = hss.showTextMenu(co, "What do you say?", "I did! I'm on top.|Fine, I'll lift you.");
+if (choice == 0) then
+hss.dlgA(co,hss.B,"But--",3)
+hss.dlgA(co,hss.U,"Do you want us to do this move or not?",3)
+hss.dlgA(co,hss.B,"...fine.",3)
+else
+hss.dlgA(co,hss.B,"Thanks... for doing your job.",3)
+hss.dlgA(co,hss.U,"Don't make me change my mind, Bianca.",3)
+end
+hss.setQuestProperty("lift", choice)
+hss.dlgA(co,hss.B,"Now, let's try it.",3)
+hss.evt(co,"You and Bianca take your positions on opposite sides of the room.", "")
+if (choice == 0) then
+hss.evt(co,"You run toward Bianca at full-speed. She opens her arms as you jump toward her and...", "")
+hss.evt(co,"...fall right on top of her!", "")
+hss.dlgA(co,hss.B,"~Uumphff!~",4)
+hss.dlgA(co,hss.U,"Ow.",2)
+else
+hss.evt(co,"Bianca runs toward you at full-speed. You open your arms as she jumps toward you and...", "")
+hss.evt(co,"...hits you hard, knocking you both off your feet!", "")
+hss.dlgA(co,hss.U,"~Uumphff!~",4)
+hss.dlgA(co,hss.B,"Ow.",3)
+end
+hss.evt(co,"The two of you untangle yourselves from each other...", "")
+hss.dlgA(co,hss.B,"We ~definitely~ need to try that again.",3)
+hss.markQuestScriptRequirementFinished()
+end
+function outro_date_0026_bianca_3(co)
+local lift;
+lift = hss.getGameProperty("date_0026_bianca_3", "lift")
+hss.evt(co,"Several grueling hours of practice later...", "")
+hss.dlgA(co,hss.B,"{YOU}! What kind of a box step was ~that?~ Do you even know the shape of a box?",3)
+hss.dlgA(co,hss.U,"Do you know the shape of my foot in your--",3)
+hss.dlgA(co,hss.B,"Bite me, {YOU}.",3)
+hss.dlgA(co,hss.U,"Ugh, you're so full of yourself! I half expect you to trip me during the dance just so ~you~ look better!",3)
+hss.dlgA(co,hss.B,"Me? What about ~you?~ How do I know you won't sabotage my dress so I have a wardrobe malfunction and become the laughingstock of the whole competition?",3)
+hss.dlgA(co,hss.U,"This is ~so~ stupid! This is never gonna work if we can't trust each other to not screw each other over!",3)
+if (lift == 0) then
+hss.dlgA(co,hss.U,"I can't jump into your arms if I'm afraid you're gonna drop me on my butt!",3)
+hss.dlgA(co,hss.B,"Then don't be such a wimp.",3)
+else
+hss.dlgA(co,hss.B,"Yeah, well I can't just jump into your arms if I'm afraid you're gonna drop me on my butt in front of ~all of America!~",3)
+hss.dlgA(co,hss.U,"I'm ~not~ gonna drop you!",3)
+end
+hss.evt(co,"You let out an exasperated groan.", "")
+hss.showQuestComplete(co)
+hss.dlgA(co,hss.U,"Look, this obviously isn't working. We need a new strategy.",3)
+hss.dlg(co,hss.U,"Maybe if we can go somewhere to loosen up and take the pressure off--")
+hss.dlgA(co,hss.B,"Let's go to Blitz!",1)
+hss.dlgA(co,hss.U,"Uh, going to a crowded nightclub wasn't exactly what I had in mind...",4)
+hss.dlgA(co,hss.B,"We're ~going~ to Blitz. Get the car.",3)
+end
+function intro_date_0026_bianca_4(co)
+hss.evt(co,"Bianca struts into Blitz and marches right up to the bar. She's already taken three shots by the time you catch up to her...", "")
+hss.dlgA(co,hss.U,"Whoa there, maybe you should slow down a bit.",4)
+hss.dlgA(co,hss.B,"If I'm gonna be seen in public with ~you,~ I need a little help.",3)
+hss.dlgA(co,hss.U,"Awww, you're ~so~ sweet.",3)
+hss.evt(co,"Just then, the DJ changes tracks, and colored spotlights pulse to the beat.", "")
+hss.dlgA(co,hss.B,"Ohmygod! This is my ~jam!~ I don't care who you are, we're ~dancing!~",4)
+hss.evt(co,"Bianca takes your hand and pulls you onto the dance floor. She throws her arms above her head and starts swaying her hips to the beat.", "")
+hss.dlg(co,hss.B,"What, are you just gonna stand there? I thought you liked to ~dance...~")
+local dance = hss.showTextMenu(co, "What do you do?", "Jump in!|Hold back.");
+if (dance == 0) then
+hss.dlgA(co,hss.U,"I was just giving you a chance to show off your stuff before I embarrassed you with my mad skills.",1)
+hss.evt(co,"You step up next to her, matching her movements. You can't help but smile as Bianca ~gets down~.", "")
+else
+hss.dlgA(co,hss.U,"I'll dance when I'm ready to dance.",3)
+hss.dlgA(co,hss.B,"Suit yourself.",3)
+hss.evt(co,"Bianca continues to dance around you, circling you and shaking her hips near yours.", "")
+hss.evt(co,"You can't help but step with the beat, the music taking over as you tentatively join in.", "")
+end
+hss.dlgA(co,hss.B,"Loosen up, {YOU}!",1)
+hss.evt(co,"Bianca throws her arms around your neck, pressing her body close to yours... the song gets faster and faster, and you match Bianca step-for-step.", "")
+hss.dlgA(co,hss.U,"I can't believe it, but... I'm actually having fun!",4)
+hss.dlgA(co,hss.B,"Duh, {YOU}. I'm ~loads~ of fun.",5)
+hss.dlgA(co,hss.U,"Yeah?",1)
+hss.evt(co,"You take Bianca's hand and pull her even closer... at the last second, you dip her down, swinging her head low to the ground...", "")
+hss.evt(co,"You pull her back to your chest, holding her close as the two of you catch your breath...", "")
+hss.dlgA(co,hss.U,"Still having fun?",1)
+hss.dlgA(co,hss.B,"You could say that. But I, uh, think I need another drink...",4)
+hss.evt(co,"Bianca grabs your arm and pulls you back to the bar... as you maneuver through the crowd, you feel something wet run down your back.", "")
+hss.dlgA(co,hss.U,"Ohh!",4)
+hss.evt(co,"You turn to find a woman holding an empty martini glass. She sneers at you, motioning for you to move along.", "")
+hss.dlgA(co,hss.U,"Hey...",3)
+hss.dlgA(co,hss.B,"Excuse me, did you just ~spill a drink~ on my ~date?!~",3)
+end
+function outro_date_0026_bianca_4(co)
+hss.evt(co,"The woman who spilled her drink on you folds her arms across her chest, looking you and Bianca up and down.", "")
+hss.dlgA(co,hss.B,"Oh, you're gonna give us the once-over after spilling your drink on {YOU}? Please. I ~invented~ that sneer.",3)
+hss.dlgA(co,hss.B,"And don't pretend like you're superior to us when you're wearing that hideous shiny Spanx crop top. The nineties called. They want their worst-dressed look back.",3)
+hss.evt(co,"The woman opens her mouth to say something, but Bianca cuts her off.", "")
+hss.dlgA(co,hss.B,"Come on, {YOU}. Let's go.",3)
+hss.showQuestComplete(co)
+hss.dlgA(co,hss.U,"Wow, Bianca. I don't know what to say...",4)
+hss.dlgA(co,hss.B,"That I'm amazing? The best? A total badass?",1)
+hss.dlg(co,hss.U,"Actually, what I really want to say is...")
+local choice = hss.showTextMenu(co, "What do you say?", "Thank you.|Don't ever do that again.");
+if (choice == 0) then
+hss.dlg(co,hss.U,"I can't believe you came to my rescue.")
+hss.dlgA(co,hss.B,"Yeah, well, no one spills drinks around me and my dress. This is ~Gucci.~",3)
+hss.dlg(co,hss.U,"Oh, I know. I remember from that first night, when I accidentally spilled your drink on you...")
+hss.dlgA(co,hss.B,"You mean when you did it ~on purpose?~",3)
+hss.dlgA(co,hss.U,"On purpose? Is that how you're remembering it?",1)
+hss.dlg(co,hss.B,"Yeah, because I remember the ~truth...~")
+hss.dlgA(co,hss.U,"And was it the ~truth~ when you called me your date tonight?",1)
+hss.dlgA(co,hss.B,"I didn't mean... that wasn't... you're not... I didn't mean anything by it!",4)
+hss.dlgA(co,hss.U,"You sure about that?",1)
+hss.evt(co,"The crowd around you grows tight, and suddenly you're both forced together... she looks up at you, leaning closer until her lips are just a breath away from yours...", "")
+hss.evt(co,"Suddenly, Bianca pushes away from you. You see her tense, a scowl coming over her face. All teasing is gone.", "")
+else
+hss.dlgA(co,hss.U,"I didn't need you to step in.",3)
+hss.dlgA(co,hss.B,"Um, I think the words you're looking for are ~'thank you.'~",3)
+hss.dlgA(co,hss.U,"I think the words I'm looking for are ~'get over yourself.'~",3)
+hss.dlgA(co,hss.U,"And what was with calling me your date, huh?",3)
+hss.dlgA(co,hss.B,"I was just bailing you out. It didn't mean ~anything!~",3)
+hss.evt(co,"You step toward her, glaring.", "")
+hss.dlgA(co,hss.U,"Are you sure about that?",3)
+hss.evt(co,"Bianca doesn't back down. Instead, she steps even closer. Before you know it, your lips are just a breath away from hers...", "")
+hss.evt(co,"Suddenly, Bianca pushes away from you.", "")
+end
+hss.dlgA(co,hss.B,"Ugh, gross. Get away from me.",3)
+hss.evt(co,"Bianca turns away, but you can see a shadow of a blush tinge her cheeks.", "")
+hss.dlgA(co,hss.U,"Oh, that's mature.",3)
+hss.dlgA(co,hss.B,"Whatever. I'm out of here.",3)
+end
+function intro_date_0026_bianca_5(co)
+hss.evt(co,"The next day, you and Bianca are backstage at the dance competition, warming up...", "")
+hss.dlg(co,hss.U,"Hey, can you pass me the--")
+hss.evt(co,"Without glancing up, Bianca flings the shoelaces you were pointing to at your face. You barely catch them.", "")
+hss.dlgA(co,hss.U,"Are you ~ever~ going to talk to me? Or is it just the silent treatment from now on?",3)
+hss.dlgA(co,hss.U,"Though the silent treatment would be kinda nice...",3)
+hss.evt(co,"You stare Bianca down. Finally, she responds.", "")
+hss.dlgA(co,hss.B,"Whatever.",3)
+hss.dlgA(co,hss.U,"Oh, wow. I've been waiting hours for something, ~anything~, from you, and you finally give me a 'whatever.' I feel so blessed.",3)
+hss.dlgA(co,hss.U,"Look, are you mad about last night?",3)
+hss.dlgA(co,hss.B,"I ~don't~ want to talk about it, {YOU}.",3)
+hss.dlgA(co,hss.U,"I got that, but we can't go out there if we're fighting. We need to be able to trust each other, remember?",3)
+hss.dlgA(co,hss.U,"You won't even look at me! How are we supposed to dance? Someone could get seriously hurt if we try the lift like this!",3)
+hss.dlgA(co,hss.B,"Fine! You want to talk? Let's talk.",3)
+end
+function outro_date_0026_bianca_5(co)
+hss.evt(co,"Bianca faces you straight on, her hands on her hips.", "")
+hss.dlgA(co,hss.B,"I don't know what you ~think~ happened last night, {YOU}, but it didn't mean ~anything.~",3)
+hss.dlgA(co,hss.B,"I'm in a relationship, and this dance competition isn't going to change that.",3)
+local choice = hss.showTextMenu(co, "What do you say?", "Maybe I WANT it to change!|I'm not asking for it to change... yet.|What are you even talking about?");
+if (choice == 0) then
+hss.dlgA(co,hss.B,"~What?!~",4)
+hss.dlgA(co,hss.U,"Don't tell me you haven't noticed the... ~tension~ between us. I ~know~ I'm not alone in this.",1)
+hss.dlgA(co,hss.B,"I, uh...",4)
+hss.dlg(co,hss.U,"You can't tell me you didn't feel anything when we were dancing.")
+hss.dlg(co,hss.U,"I'm not saying that everything's forgiven or that Lance doesn't matter, but we can't pretend ~nothing's~ changed.")
+hss.dlgA(co,hss.U,"I felt something last night, and I ~know~ you did, too.",3)
+elseif (choice == 1) then
+hss.dlg(co,hss.U,"I'm just as confused as you are. ~Believe~ me.")
+hss.dlg(co,hss.U,"But I can't help but wonder what'd happen if we gave us a chance. ~Half~ a chance, even.")
+hss.dlgA(co,hss.B,"Look, we're both just using each other here. You want to improve your rep, I want a sweet vacay.",3)
+hss.dlgA(co,hss.U,"You're lying to yourself, Bianca. You can't tell me you didn't feel ~anything~ when we were dancing.",3)
+hss.dlg(co,hss.U,"I'm not saying that everything's forgiven or that Lance doesn't matter, but we can't pretend ~nothing's~ changed.")
+hss.dlgA(co,hss.U,"I felt something last night, and I ~know~ you did, too.",3)
+else
+hss.dlgA(co,hss.U,"I don't care if you're in a relationship or not. I need you to get on that stage and ~dance.~",3)
+hss.dlgA(co,hss.B,"But I thought... isn't this about last night?",4)
+hss.dlgA(co,hss.U,"What ~about~ last night?",3)
+hss.evt(co,"You stare her down, waiting for her to admit something, ~anything~... but she remains quiet.", "")
+hss.dlgA(co,hss.U,"That's what I thought. Look, I don't know what feelings you think you have for me... but you gotta lock 'em down.",3)
+hss.dlgA(co,hss.U,"We've got a dance to do.",3)
+end
+hss.showQuestComplete(co)
+hss.dlgA(co,hss.B,"You have no idea what you're talking about--",3)
+hss.dlgA(co,"HARRISON","Hey guys...",1)
+hss.dlgA(co,"HARRISON","Oh, uh, sorry to interrupt. But you're up.",4)
+if (choice == 0) or (choice == 1) then
+hss.evt(co,"Bianca starts to follow Harrison, but you put a hand on her arm, stopping her.", "")
+hss.dlgA(co,hss.U,"We ~are~ going to talk about this later. I'm not letting this go.",3)
+hss.dlgA(co,hss.B,"Whatever. Let's just dance.",3)
+else
+hss.evt(co,"You start to follow Harrison, but Bianca puts a hand on your arm, stopping you.", "")
+hss.dlgA(co,hss.B,"We're not done talking about this, {YOU}. You can't just ambush me like that and walk away.",3)
+hss.dlgA(co,hss.U,"Whatever you say. Let's just dance.",3)
+end
+end
+function intro_date_0026_bianca_6(co)
+local lift;
+lift = hss.getGameProperty("date_0026_bianca_3", "lift")
+hss.evt(co,"You and Bianca walk on stage as the music starts. You hit your starting pose, then do the first few dance steps.", "")
+hss.evt(co,"Out of the corner of your eye, you see Bianca going through the motions, but her performance has no spark...", "")
+hss.dlgA(co,hss.U,"Bianca, what are you doing? Step it up!",3)
+hss.dlgA(co,hss.B,"~You~ step it up!",3)
+hss.evt(co,"You notice a few faces in the audience are completely zoned out, and the judges are barely looking at you. You pull Bianca in close and whisper harshly...", "")
+hss.dlgA(co,hss.U,"Bianca, ~do~ something! ~Feel~ something.",3)
+hss.evt(co,"Bianca scoffs. Exasperated, you decide to improv the next step. You take Bianca's hand and you dip her down, swinging her head low to the ground, just like at Blitz...", "")
+hss.dlgA(co,hss.B,"Hey!",4)
+hss.evt(co,"You pull her back to your chest, holding her close... you can hear a few scattered claps from the audience.", "")
+hss.dlgA(co,hss.U,"Are you gonna dance with me or not?",3)
+hss.evt(co,"Miffed, Bianca pushes away from you... but now her moves are angry, energized, ~alive.~ The judges can't look away as the two of you spin around the stage.", "")
+hss.dlgA(co,hss.U,"If we can just hit our big lift, we might still have a shot at winning this thing.",3)
+if (lift == 0) then
+hss.evt(co,"You and Bianca face one another on opposite sides of the stage. As the music crescendos, you run toward her at a full sprint...", "")
+hss.dlgA(co,hss.U,"You'd better not drop me!",3)
+else
+hss.dlgA(co,hss.B,"Just don't drop me.",3)
+hss.evt(co,"You and Bianca face one another on opposite sides of the stage. As the music crescendos, Bianca runs toward you at a full sprint...", "")
+hss.dlgA(co,hss.U,"We got this... I hope!",4)
+end
+end
+function outro_date_0026_bianca_6(co)
+local lift;
+lift = hss.getGameProperty("date_0026_bianca_3", "lift")
+hss.evt(co,"You and Bianca have one final move left in the dance competition... the big lift!", "")
+if (lift == 0) then
+hss.evt(co,"You jump into Bianca's arms and she lifts you high above her head as you extend your arms and legs...", "")
+hss.dlgA(co,hss.U,"Whoaaa...",4)
+hss.evt(co,"Bianca flips you down, then spins you in a graceful arc. You strike your final pose, Bianca holding you close with your leg over her hip.", "")
+else
+hss.evt(co,"Bianca jumps into your arms and you lift her high above your head as she extends her leg in an elegant arabesque...", "")
+hss.dlgA(co,hss.B,"Keep it steady, {YOU}.",3)
+hss.evt(co,"You flip her down, then spin her in a graceful arc. You strike your final pose, holding Bianca close to you with her leg over your hip.", "")
+end
+hss.evt(co,"The audience goes crazy... even the judges give you a standing ovation!", "")
+hss.dlgA(co,hss.U,"We did it!",1)
+hss.dlgA(co,hss.B,"I can't believe I'm saying it... but you were amazing, {YOU}!",1)
+hss.evt(co,"As the audience cheers die down, Harrison walks onstage. You and Bianca untangle yourselves...", "")
+hss.dlgA(co,"HARRISON","Let's hear it one more time for our final dynamic duo... Bianca and {YOU}!",1)
+hss.dlgA(co,"HARRISON","The judges have quite a decision on their hands... we'll be right back once they talk it out.",1)
+hss.evt(co,"You and Bianca rush backstage, grinning and laughing.", "")
+hss.dlgA(co,hss.U,"We pulled it off! We ~actually~ pulled it off!",1)
+hss.dlg(co,hss.B,"I honestly didn't think you had it in you.")
+hss.dlg(co,hss.U,"Oh, I know. But we ~nailed~ it!")
+hss.evt(co,"You and Bianca hug, completely caught up in the adrenaline from your performance!", "")
+hss.evt(co,"After a moment, the two of you spring apart, suddenly realizing what you were doing...", "")
+hss.dlgA(co,hss.U,"Oh!",4)
+hss.dlgA(co,hss.B,"Uh, sorry.",4)
+hss.evt(co,"You're aware of your heart pounding in your chest as Bianca leans toward you. You whisper...", "")
+hss.dlg(co,hss.U,"It's okay...")
+hss.evt(co,"You feel something drawing you in, drawing you closer... you can't help but stare at her lips...", "")
+local kiss = hss.showTextMenu(co, "What do you do?", "Resist.|Let this happen...");
+if (kiss == 0) then
+hss.evt(co,"You push her away, taking a few steps back to put some space between you.", "")
+hss.dlgA(co,hss.U,"Whoa there. Just because we somehow managed to make it through this competition doesn't mean we're suddenly friends or anything, Bianca.",3)
+hss.dlgA(co,hss.B,"But I thought...",4)
+hss.dlgA(co,hss.B,"I mean, ~duh!~ Gross.",3)
+hss.dlgA(co,hss.U,"Just making sure we're clear. We're ~not~ friends.",3)
+else
+hss.evt(co,"You lean in and kiss her on the lips!", "")
+hss.dlgA(co,hss.U,"Sorry! I didn't mean to...",4)
+hss.dlgA(co,hss.B,"Didn't you?",1)
+hss.dlgA(co,hss.U,"I... do you ~want~ me to mean to?",4)
+hss.dlgA(co,hss.B,"I don't know what you're saying at this point, but you'd better kiss me again.",1)
+hss.dlgA(co,hss.U,"~That~ I can do.",1)
+hss.evt(co,"You kiss Bianca again, for longer this time. She grabs you, pulling you impossibly close...", "")
+end
+hss.showQuestComplete(co)
+hss.evt(co,"After the commercial break, all the contestants line up on stage next to Harrison.", "")
+hss.dlgA(co,"HARRISON","You've all worked very hard during this competition, but only one pair can take home the trophy.",1)
+hss.dlgA(co,"HARRISON","And the winners are... {YOU} and Bianca!",1)
+if (kiss == 0) then
+hss.evt(co,"You run up to accept the trophy, bumping Bianca out of the way so you can grab it first.", "")
+hss.dlgA(co,hss.B,"~Oooof!~ Hey.",3)
+hss.dlgA(co,hss.U,"Back off. We wouldn't have won if it weren't for ~me.~",3)
+hss.dlgA(co,"HARRISON","Looks like the winning pair isn't as ~in-sync~ as we thought!",4)
+hss.evt(co,"You force yourself to put your arm around Bianca as the cameras focus on you.", "")
+hss.dlgA(co,hss.U,"Nonsense, Harrison. Bianca and I just need music to make our chemistry shine!",1)
+hss.evt(co,"After the cameras move away, Bianca shoves your arm off her and snatches the trophy from you.", "")
+hss.dlgA(co,hss.B,"Winning doesn't change anything, {YOU}. I was just doing what was necessary to win the competition. And it worked.",3)
+else
+hss.dlgA(co,hss.U,"We did it!",5)
+hss.dlgA(co,hss.B,"Hell ~yeah,~ we did!",1)
+hss.evt(co,"The two of you run up and take the trophy from Harrison. Together, you hoist it over your heads as confetti falls from the ceiling!", "")
+hss.evt(co,"You put your arm around Bianca's waist as photographers capture the moment... but when they move away, Bianca steps out of your embrace.", "")
+hss.dlgA(co,hss.U,"Is something wrong?",4)
+hss.evt(co,"Bianca motions for you to follow her away from the cameras.", "")
+hss.dlgA(co,hss.B,"Look, we had some fun the last few days or whatever. But that kiss was a mistake.",3)
+hss.dlgA(co,hss.U,"It didn't seem like a mistake a few minutes ago.",3)
+hss.dlgA(co,hss.B,"Well, it was.",3)
+hss.dlgA(co,hss.U,"Bianca, come on. Don't do this.",3)
+hss.dlgA(co,hss.B,"I'm not doing anything, {YOU}. It's not ~my~ fault you thought there was something here when there wasn't. I was just doing what was necessary to win the competition. And it worked.",3)
+end
+hss.dlgA(co,hss.B,"We're done now. Back to normal.",2)
+hss.evt(co,"You look at Bianca, confused. For a moment, she looks almost sad... but her expression hardens before you can pinpoint the emotion.", "")
+hss.dlgA(co,hss.U,"Fine. I guess... nothing's changed.",3)
+hss.evt(co,"Bianca turns to leave, trophy in tow.", "")
+hss.dlgA(co,hss.U,"You know, we did share ~something~ out on that dance floor. I may not know exactly what it was, but it was real.",3)
+hss.dlgA(co,hss.U,"And you can act like this never happened, Bianca, but I know the truth, and you can't take that away from me.",3)
+hss.evt(co,"Bianca pauses... then keeps walking.", "")
+end
+local sceneTable = {}
+sceneTable["inter_preview"] = inter_preview
+sceneTable["outro_date_0026_bianca_1"] = outro_date_0026_bianca_1
+sceneTable["outro_date_0026_bianca_2"] = outro_date_0026_bianca_2
+sceneTable["inter_rehearse"] = inter_rehearse
+sceneTable["outro_date_0026_bianca_3"] = outro_date_0026_bianca_3
+sceneTable["intro_date_0026_bianca_4"] = intro_date_0026_bianca_4
+sceneTable["outro_date_0026_bianca_4"] = outro_date_0026_bianca_4
+sceneTable["intro_date_0026_bianca_5"] = intro_date_0026_bianca_5
+sceneTable["outro_date_0026_bianca_5"] = outro_date_0026_bianca_5
+sceneTable["intro_date_0026_bianca_6"] = intro_date_0026_bianca_6
+sceneTable["outro_date_0026_bianca_6"] = outro_date_0026_bianca_6
+hss.runScene(sceneTable)

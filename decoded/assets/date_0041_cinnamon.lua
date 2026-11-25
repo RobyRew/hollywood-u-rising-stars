@@ -1,0 +1,68 @@
+function inter_preview(co)
+hss.evt(co,"~Snapshot Dates are brief glimpses of the simpler things in love. Enjoy everything from lavish date nights to cozy moments of domestic fluff in these bite-sized quests.~", "")
+hss.evt(co,"~In this Snapshot Date, kick off your weekend at a trendy new bakery with Aria Sheridan!~", "")
+hss.markQuestScriptRequirementFinished()
+end
+function outro_date_0041_cinnamon_1(co)
+hss.evt(co,"One Saturday morning, you wake up bright and early to meet Aria for the grand opening of Daybreak, a new gourmet bakery in Pacific Palisades.", "")
+hss.evt(co,"By the time you arrive, the place is packed! Young celebs crowd around bright yellow tables, taking selfies with one another. A line of customers stretches from the counter to the door.", "")
+hss.dlgA(co,"ARIA","{YOU}! Over here, over here!",1)
+hss.evt(co,"You spot Aria standing in front of the double-doors leading to the kitchen, waving at you as she bounces up and down on tiptoes.", "")
+hss.dlgA(co,hss.U,"Hey, you. Do you have permission to be behind the counter?",1)
+hss.dlgA(co,"ARIA","Oh, don't worry, I can pretty much go anywhere I want. Since I'm the owner and all.",1)
+hss.dlgA(co,hss.U,"Whoa, you didn't tell me you bought this place!",4)
+hss.dlgA(co,"ARIA","I wanted it to be a surprise! And what we're doing on this super special date is ~also~ a surprise.",1)
+hss.dlg(co,hss.U,"I'm guessing that means we're not here for bagels and coffee.")
+hss.dlgA(co,"ARIA","Nope! We're here to ~bake!~",1)
+hss.evt(co,"Aria grabs your hand and tugs you along behind her, leading you into the sprawling kitchen. Most of the day's baking is already done, but one older woman in a tall chef's hat greets you at a long cooking bench.", "")
+hss.dlgA(co,"ARIA","This is Britte, Copenhagen's ~best~ pastry chef. She makes the most amazing cinnamon rolls I've ever tasted, and she said she'll teach us her recipe!",1)
+hss.dlgA(co,hss.U,"Really? That's awesome, because...",4)
+local choice = hss.showTextMenu(co, "What do you say?", "I'm a star baker!|I'm awful at baking!");
+if (choice == 0) then
+hss.dlg(co,hss.U,"I make a pretty mean cinnamon roll, if I do say so myself.")
+hss.dlgA(co,hss.U,"But I'd ~love~ to get some pointers on how to improve my recipe, Britte.",1)
+else
+hss.dlg(co,hss.U,"Pretty much everything I've ever tried to bake has come out burnt to a crisp.")
+hss.dlgA(co,hss.U,"So I'm really looking forward to learning the ropes from a talented pastry chef like you, Britte!",1)
+end
+hss.evt(co,"Britte beams at your enthusiasm before ushering you and Aria over to a workstation equipped with several large mixing bowls.", "")
+hss.evt(co,"As you set up beside Aria, you both roll up your sleeves. Your arm brushes hers, sending a pleasant wave cascading up your skin.", "")
+hss.dlg(co,hss.U,"It was really sweet of you to plan this, Aria.")
+hss.dlgA(co,"ARIA","You haven't even heard all my plans yet. Once we master this recipe, I'm going to make you cinnamon rolls ~every morning!~",1)
+hss.dlgA(co,hss.U,"Even sweeter. Let's get started!",1)
+hss.evt(co,"Britte helps you and Aria mix together the ingredients for the dough, then sets you to kneading for five minutes...", "")
+hss.dlgA(co,"ARIA","Phew! This kneading thing is ~way~ exhausting. I feel like my arms are gonna fall right off!",4)
+hss.dlgA(co,hss.U,"We can't let that happen. How about I give you a deep-tissue massage once we're done here?",1)
+hss.dlgA(co,"ARIA","OMG, I'd ~love~ that!",1)
+hss.dlg(co,hss.U,"Pleasure's all mine. For now, pass me the dough. I'll take over kneading while you work on the glaze.")
+hss.evt(co,"Aria passes the dough to you, leaning in to press a quick kiss to your cheek while she's close.", "")
+hss.dlgA(co,hss.U,"What was that for?",4)
+hss.dlgA(co,"ARIA","Oh, you know. Just for being the most amazing date ever.",1)
+hss.dlgA(co,hss.U,"Hey, that title belongs to ~you.~",1)
+hss.showQuestComplete(co)
+hss.evt(co,"You duck down to return Aria's peck, catching the corner of your mouth. She giggles and winks before turning back to Britte to help with the glaze.", "")
+hss.evt(co,"Soon, the cinnamon rolls are ready to enter the oven. Britte compliments you on a job well done before taking her leave.", "")
+hss.dlgA(co,"ARIA","Thanks for staying late to teach us your recipe, Britte. These are going to be ~delish!~",1)
+hss.evt(co,"You set the timer while Aria hops up onto the flour-coated counter.", "")
+hss.dlgA(co,"ARIA","What do you wanna do while we wait?",1)
+hss.dlgA(co,hss.U,"I can think of ~one~ thing...",1)
+hss.evt(co,"You step up and brace a hand on either side of Aria, leaning in close until your lips brush against hers... she lets out a quiet giggle, but doesn't pull back.", "")
+hss.dlgA(co,"ARIA","Hey, you stole my idea.",1)
+hss.dlgA(co,hss.U,"I'll make it up to you, promise.",1)
+hss.evt(co,"You close the gap between you and Aria, pulling her close to share sweet kisses until the oven finally dings.", "")
+if (choice == 0) then
+hss.dlg(co,hss.U,"As much as I would love to just do this forever, I could never let a batch of cinnamon rolls burn.")
+else
+hss.dlg(co,hss.U,"As much as I would love to just do this forever, I'm hoping these cinnamon rolls are the first things I bake that ~don't~ burn.")
+end
+hss.dlgA(co,"ARIA","Go rescue them! I'll get us a glass of milk.",1)
+hss.evt(co,"Once you take the rolls out of the oven, filling the room with the delicious aroma of sweetened cinnamon, you settle against the counter with Aria and split one of the huge glazed pastries.", "")
+hss.dlgA(co,"ARIA","Ohmigod, this honestly tastes even better than the cinnamon rolls Britte makes herself!",9)
+hss.dlgA(co,hss.U,"That's because ~ours~ are made with love.",1)
+hss.evt(co,"Aria laughs and kisses you again. You smile against her mouth before kissing her back, chasing the taste of cinnamon on her lips...", "")
+hss.evt(co,"~Stay tuned for more Snapshot Dates, coming soon to Amour!~", "")
+end
+local sceneTable = {}
+sceneTable["inter_preview"] = inter_preview
+sceneTable["outro_date_0041_cinnamon_1"] = outro_date_0041_cinnamon_1
+hss.runScene(sceneTable)

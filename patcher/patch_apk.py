@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
 # Tweak releases stay on 1.0.x. Bump only VERSION_PATCH.
-VERSION_PATCH = 8
+VERSION_PATCH = 20
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # 1.0.0 -> 10000, 1.0.1 -> 10001. Each build still replaces the previous one.
 VERSION_CODE = 10000 + VERSION_PATCH
@@ -152,6 +152,7 @@ def patch_smali_tree(smali_root: Path) -> None:
         "OfflineMenu$Gear.smali",
         "OfflineMenu$Row.smali",
         "OfflineMenu$Run.smali",
+        "OfflineMenu$Toggle.smali",
     ):
         shutil.copyfile(ROOT / "patcher" / extra, destination.parent / extra)
     pending = receivers = receivers4 = 0
@@ -234,6 +235,23 @@ def patch_smali_tree(smali_root: Path) -> None:
 .end method
 """
     activity.write_text(source, encoding="utf-8")
+    sponsor = smali_root / "com/pixelberrystudios/darthkitty/DKSponsorPay.smali"
+    if sponsor.is_file():
+        sponsor_text = sponsor.read_text(encoding="utf-8")
+        if "syncRr" not in sponsor_text:
+            old = ".method public static native DKSponsorPayOnChangeStatusError()V\n.end method\n"
+            new = old + """
+.method public static syncRr()V
+    .locals 0
+
+    invoke-static {}, Lcom/pixelberrystudios/darthkitty/DKSponsorPay;->DKSponsorPayOnSPBrandEngageOffersAvailable()V
+
+    return-void
+.end method
+"""
+            if old not in sponsor_text:
+                raise RuntimeError("could not find SponsorPay error native")
+            sponsor.write_text(sponsor_text.replace(old, new, 1), encoding="utf-8")
     helpshift = smali_root / "com/helpshift/bs.smali"
     if helpshift.is_file():
         text = helpshift.read_text(encoding="utf-8")
@@ -400,6 +418,14 @@ def main() -> int:
         table = json.loads(strings.read_text(encoding="utf-8"))
         table["settings.about"] = "OFFLINE"
         strings.write_text(json.dumps(table, ensure_ascii=False, separators=(", ", ": ")), encoding="utf-8")
+    helper = args.work / "assets" / "hss.lua"
+    if helper.is_file():
+        lua = helper.read_text(encoding="utf-8")
+        old_wait = 'function tutorialWaitForTap(co)\nshowFullscreenImage("", co) -- just show an empty screen\nend\n'
+        new_wait = "function tutorialWaitForTap(co)\nend\n"
+        if old_wait not in lua and new_wait not in lua:
+            raise RuntimeError("could not find tutorialWaitForTap")
+        helper.write_text(lua.replace(old_wait, new_wait, 1), encoding="utf-8")
     patch_native_libs(args.work)
 
     unsigned = args.work.parent / "unsigned.apk"

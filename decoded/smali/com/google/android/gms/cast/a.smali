@@ -1,0 +1,18 @@
+.class Lcom/google/android/gms/cast/a;
+.super Landroid/support/v7/media/r;
+
+
+# instance fields
+.field final synthetic a:Lcom/google/android/gms/cast/CastRemoteDisplayLocalService;
+
+
+# direct methods
+.method constructor <init>(Lcom/google/android/gms/cast/CastRemoteDisplayLocalService;)V
+    .locals 0
+
+    iput-object p1, p0, Lcom/google/android/gms/cast/a;->a:Lcom/google/android/gms/cast/CastRemoteDisplayLocalService;
+
+    invoke-direct {p0}, Landroid/support/v7/media/r;-><init>()V
+
+    return-void
+.end method

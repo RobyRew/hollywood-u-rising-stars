@@ -46,9 +46,18 @@
     :not_diamonds
     const/4 v1, 0x2
 
-    if-ne v0, v1, :unlock
+    if-ne v0, v1, :not_xp
 
     invoke-static {}, Lcom/pixelberrystudios/darthkitty/DKSponsorPay;->DKSponsorPayOnChangeStatusError()V
+
+    return-void
+
+    :not_xp
+    const/4 v1, 0x4
+
+    if-ne v0, v1, :unlock
+
+    invoke-static {}, Lcom/pixelberrystudios/darthkitty/DKSponsorPay;->syncRr()V
 
     return-void
 

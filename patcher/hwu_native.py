@@ -19,6 +19,11 @@ ARE_PRODUCTS_AVAILABLE = 0x4014D0
 HAS_PRODUCT = 0x401568
 CAN_PURCHASE = 0x4015BC
 PURCHASE = 0x4015C8
+# Gives the real config reward locally, then closes the buy dialog.
+# Fits in the 34-byte purchase function and stops before rewardPurchase.
+LOCAL_PURCHASE = bytes.fromhex(
+    "30b504460d46dbf731fe03685b6e98472946f3f759fe2046294601f077f930bd"
+)
 
 GET_SINGLETON = 0x3DD234
 CREDIT_COINS = 0x3E69B4
@@ -62,6 +67,36 @@ PURCHASE_ITEM_SKIP_SETUP = 0x3BF686
 PURCHASE_ITEM_REQUIRE_ACCOUNT = 0x3BF6EC
 PURCHASE_CURRENCY_SKIP_SETUP = 0x3C069C
 PURCHASE_CURRENCY_REQUIRE_ACCOUNT = 0x3C0700
+# Currency buys show the account dialog before purchaseCurrency when two
+# save flags are clear. Skip those flags and go straight to the local buy.
+PREPURCHASE_ACCOUNT_GATE = 0x3C07DE
+PREPURCHASE_BUY = 0x3C083A
+# Friends labeled "Unlocks with Club VIP" are character types whose config
+# bit requires a placed PARTY building (type 10). That branch returns true.
+CAN_PURCHASE_CHARACTER_PARTY = 0x3CD85C
+CAN_PURCHASE_CHARACTER_RETURN = 0x3CD8AC
+HAS_CREDITED_BUILDING = 0x3F4878
+# PlayerLogic::credit tells listeners, and the sound listener calls into Java
+# audio. That JNI FindClass faults (SIGBUS) and kills the process after a buy.
+CURRENCY_EARNED_SOUND = 0x41B074
+# creditPurchase plays the same effect itself when the product has no extra reward.
+CREDIT_PURCHASE_SOUND = 0x3F54FC
+# Dead analytics. FindClass faults on this Android version and aborts the buy.
+EMIT_TELEMETRY = 0x42D7F0
+# Sale-date checks call Java and abort the process. Cards stay visible.
+CURRENCY_ITEM_VISIBLE = 0x3F50D4
+# LeanPlum track calls Java and aborts the process. The purchase is already credited.
+LEANPLUM_TRACK = (
+    0x369738,
+    0x3697A0,
+    0x369820,
+    0x369890,
+    0x369928,
+    0x3699A4,
+)
+# The reward cinematic draws a label through Java and aborts. The items are
+# already credited. Skip the scene and let the store close.
+POST_PURCHASE_SCENE = 0x3C1B5E
 # The settings gear is skipped unless a progress bit is set. That bit stays
 # clear when the tutorial never runs, so the gear has to be added anyway,
 # and the rest of the HUD icons still have to be added after it.
@@ -432,23 +467,22 @@ def patch_libhss(path: Path) -> None:
     if locked_cave + len(stub) >= 0x3A45F8:
         raise RuntimeError("lock stub spilled into the next function")
     data[locked_cave : locked_cave + len(stub)] = stub
-    data[SET_LOCKED : SET_LOCKED + 4] = _b_wide(SET_LOCKED, locked_cave)
+    if locked_cave != 0x3A44B6:
+        raise RuntimeError(f"lock stub moved to {locked_cave:#x}")
 
     data[ARE_PRODUCTS_AVAILABLE : ARE_PRODUCTS_AVAILABLE + 4] = _return_imm(1)
     data[HAS_PRODUCT : HAS_PRODUCT + 4] = _return_imm(1)
     data[CAN_PURCHASE : CAN_PURCHASE + 4] = _return_imm(1)
-    data[PURCHASE : PURCHASE + 4] = _b_wide(PURCHASE, CAVE)
-    for addr in RETURN_TRUE:
-        data[addr : addr + 4] = _return_imm(1)
-    for addr in RETURN_FALSE:
-        data[addr : addr + 4] = _return_imm(0)
+    if len(LOCAL_PURCHASE) > 34:
+        raise RuntimeError("local purchase stub does not fit")
+    data[PURCHASE : PURCHASE + len(LOCAL_PURCHASE)] = LOCAL_PURCHASE
+    # Store cards for buildings and clothes, including Club VIP.
+    data[0x3F4FF8 : 0x3F4FF8 + 4] = _return_imm(1)
+    data[0x3F3F34 : 0x3F3F34 + 4] = _return_imm(1)
     # Fall through into the real currency list instead of the network error.
     data[CURRENCY_NETWORK_BPL : CURRENCY_NETWORK_BPL + 2] = _hw(0x46C0)
     data[CURRENCY_NETWORK_B : CURRENCY_NETWORK_B + 2] = _hw(0xE7FF)
     data[CLOTHING_NETWORK_BNE : CLOTHING_NETWORK_BNE + 2] = _hw(0x46C0)
-    data[START_TUTORIAL : START_TUTORIAL + 2] = _hw(0x4770)
-    data[RUN_TUTORIAL_TRIGGERS : RUN_TUTORIAL_TRIGGERS + 2] = _hw(0x4770)
-    data[IS_TUTORIAL_ACTIVE : IS_TUTORIAL_ACTIVE + 4] = _return_imm(0)
     # Skip the create-account setup, then take the purchase branch anyway.
     data[PURCHASE_ITEM_SKIP_SETUP : PURCHASE_ITEM_SKIP_SETUP + 2] = bytes.fromhex("2ae0")
     data[PURCHASE_ITEM_REQUIRE_ACCOUNT : PURCHASE_ITEM_REQUIRE_ACCOUNT + 2] = bytes.fromhex("01e0")
@@ -457,14 +491,42 @@ def patch_libhss(path: Path) -> None:
     menu = _offline_menu_cave()
     data[OFFLINE_CAVE : OFFLINE_CAVE + len(menu)] = menu
     data[ABOUT_BUTTON : ABOUT_BUTTON + 4] = _b_wide(ABOUT_BUTTON, OFFLINE_CAVE)
-    data[ADD_COINS : ADD_COINS + len(ADD_COINS_STUB)] = ADD_COINS_STUB
-    data[ADD_HEARTS : ADD_HEARTS + len(ADD_HEARTS_STUB)] = ADD_HEARTS_STUB
     data[GRANT_CASH : GRANT_CASH + len(GRANT_CASH_STUB)] = GRANT_CASH_STUB
     data[GRANT_DIAMONDS : GRANT_DIAMONDS + len(GRANT_DIAMONDS_STUB)] = GRANT_DIAMONDS_STUB
     data[GRANT_XP : GRANT_XP + len(GRANT_XP_STUB)] = GRANT_XP_STUB
-    _expect(data, PURCHASE_FINISH, bytes.fromhex("20462946"))
-    if PAYOUT_EPILOGUE + len(PAYOUT_TAIL) > 0x3A4572:
-        raise RuntimeError("payout tail spilled into the next live instructions")
-    data[PAYOUT_EPILOGUE : PAYOUT_EPILOGUE + len(PAYOUT_TAIL)] = PAYOUT_TAIL
-    data[PURCHASE_FINISH : PURCHASE_FINISH + 4] = _b_wide(PURCHASE_FINISH, PAYOUT_EPILOGUE)
+    # No Pixelberry account exists anymore. Pretending one does skips the
+    # "could not create an account" dialog and lets the buy continue.
+    data[0x40CA38 : 0x40CA38 + 4] = _return_imm(1)
+    _expect(data, PREPURCHASE_ACCOUNT_GATE, bytes.fromhex("1cf029fd"))
+    gate = _b_short(PREPURCHASE_ACCOUNT_GATE, PREPURCHASE_BUY)
+    data[PREPURCHASE_ACCOUNT_GATE : PREPURCHASE_ACCOUNT_GATE + 2] = gate
+    # Club VIP friends: the party-building branch of canPurchaseCharacterType
+    # returns true. Level-gated characters still use the real level check.
+    # The building itself stays a real purchase so party benefits have a building.
+    _expect(data, CAN_PURCHASE_CHARACTER_PARTY, bytes.fromhex("20690368"))
+    party_ok = _movs_imm(5, 1) + _b_short(CAN_PURCHASE_CHARACTER_PARTY + 2, CAN_PURCHASE_CHARACTER_RETURN)
+    data[CAN_PURCHASE_CHARACTER_PARTY : CAN_PURCHASE_CHARACTER_PARTY + len(party_ok)] = party_ok
+    # A previous build pretended PARTY was already owned. That hid the building
+    # and did not put one in the save. Ownership is the real check again.
+    data[HAS_CREDITED_BUILDING : HAS_CREDITED_BUILDING + 4] = bytes.fromhex("f8b5006a")
+    # The buy already added the currency. Skip the sound that crashes the process.
+    _expect(data, CURRENCY_EARNED_SOUND, bytes.fromhex("38b5"))
+    data[CURRENCY_EARNED_SOUND : CURRENCY_EARNED_SOUND + 2] = _hw(0x4770)
+    _expect(data, CREDIT_PURCHASE_SOUND, bytes.fromhex("25f000fd"))
+    data[CREDIT_PURCHASE_SOUND : CREDIT_PURCHASE_SOUND + 4] = bytes.fromhex("00bf00bf")
+    _expect(data, EMIT_TELEMETRY, bytes.fromhex("10b5"))
+    data[EMIT_TELEMETRY : EMIT_TELEMETRY + 2] = _hw(0x4770)
+    _expect(data, CURRENCY_ITEM_VISIBLE, bytes.fromhex("f0b54546"))
+    data[CURRENCY_ITEM_VISIBLE : CURRENCY_ITEM_VISIBLE + 4] = _return_imm(1)
+    for addr in LEANPLUM_TRACK:
+        data[addr : addr + 2] = _hw(0x4770)
+    _expect(data, POST_PURCHASE_SCENE, bytes.fromhex("fff78dfd"))
+    data[POST_PURCHASE_SCENE : POST_PURCHASE_SCENE + 4] = bytes.fromhex("00bf00bf")
+    # "Unlocks with Quest ..." is only the store card. The quest itself still runs.
+    data[0x3F3FD0 : 0x3F3FD0 + 4] = _return_imm(1)
+    # Requirement failures inside a real product (level, quest, clothing) should
+    # not block the credit. A missing product still returns 2 and is not granted.
+    data[0x3F4EC8 : 0x3F4EC8 + 2] = _movs_imm(0, 0)
+    data[0x3F4EEA : 0x3F4EEA + 2] = _movs_imm(0, 0)
+    data[0x3F4EFA : 0x3F4EFA + 2] = _movs_imm(0, 0)
     path.write_bytes(data)

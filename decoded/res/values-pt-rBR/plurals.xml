@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="hs__notification_content_title">
+        <item quantity="other">%d novas mensagens de apoio</item>
+        <item quantity="one">Nova mensagem de apoio</item>
+    </plurals>
+</resources>

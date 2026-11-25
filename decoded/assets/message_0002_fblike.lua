@@ -1,0 +1,23 @@
+require "hss"
+-- HWU Message #2 "Facebook - 100 Diamond Reward!"
+function outro_message_0002_fblike_1(co)
+hss.evt(co,"Addison meets you and Ethan at your dorm room...", "")
+hss.dlgA(co,hss.A,"Guys! Hollywood U has a crazy number of followers all of a sudden!",4)
+hss.dlg(co,hss.E,"The administrators are definitely stepping up their social media game. About time, I say.")
+hss.dlg(co,hss.E,"In this town, you've always gotta be one step ahead, and Hollywood U's Facebook and Twitter hook me up with the latest scoops.")
+hss.dlgA(co,hss.A,"Also, cute pictures of new outfits!",1)
+hss.dlgA(co,hss.E,"Uh, yeah, those too!",4)
+hss.dlgA(co,hss.U,"Hm, that sounds like fun. Maybe I should Like the page too.",1)
+hss.evt(co,"You visit Hollywood U's Facebook and Twitter pages and start following...", "")
+hss.evt(co,"Just then, an envelope slips under your door! You pick it up and open it.", "")
+hss.dlgA(co,hss.U,"Hey, it's another letter from my benefactor!",1)
+hss.dlg(co,hss.A,"What's it say?")
+hss.dlg(co,hss.U,"'Thanks for helping grow Hollywood U! Big things ahead.' And there's something else in here... it's...")
+hss.dlgA(co,hss.U,"Whoa!",4)
+hss.showQuestComplete(co)
+hss.evt(co,"Thanks so much for your support! You can use your bonus Diamonds to rush quests, go on dates, or even add new friends to your entourage!", "")
+hss.evt(co,"Haven't started following Hollywood U online yet? Want to see what all the buzz is about?", "")
+hss.evt(co,"Tap 'Go Now' to visit our Facebook page and join the Hollywood U club!", "https://facebook.com/playHollywoodU")
+hss.evt(co,"Thanks for playing!", "")
+end
+hss.runOpt()
