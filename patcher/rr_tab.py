@@ -16,6 +16,10 @@ Tags (rows top to bottom; Hollywood U's wallets are cash and diamonds):
   11 export        12 import        13 reset (Java only)
 
 Unlock all = +100M cash, +100M diamonds, max level, max friends, max buildings.
+Max level / friends / buildings and unlock all first end an active tutorial
+through the game's own TutorialLogic::stopTutorial(): a tutorial step such as
+"Level up! Select yourself" otherwise waits for a character that is already
+at the top level and marks it ineligible.
 Every grant stops at 2,000,000,000 (CAP), so a counter never reaches the
 32-bit signed limit.
 """
@@ -45,6 +49,9 @@ GET_XP = 0x3E4048                 # PlayerLogic::getXP()
 GET_PLAYER_LEVEL = 0x3E406C       # PlayerLogic::getPlayerLevel()
 XP_FOR_LEVEL = 0x3E4018           # PlayerLogic::getXPForLevel(unsigned level)
 IS_MAX_LEVEL = 0x3E4078           # PlayerLogic::isPlayerMaxLevel()
+LM_TUTORIAL_LOGIC = 0x70          # vtable slot -> TutorialLogic* (TutorialState at +0x2c)
+IS_TUTORIAL_ACTIVE = 0x3FB224     # TutorialState::isTutorialActive() const
+STOP_TUTORIAL = 0x400640          # TutorialLogic::stopTutorial(): the end-of-tutorial routine (saves)
 GET_COINS = 0x3E419C              # PlayerLogic::getCoins()
 GET_HEARTS = 0x3E436C             # PlayerLogic::getHearts()
 # SponsorPay JNI callbacks hwu_native once turned into fixed 10M grants. They
@@ -84,6 +91,7 @@ TITLE_CAVE = (0x36992A, 0x3699A4)
 DISPATCH_CAVE = (0x3699A6, 0x369A30)
 SPRITE_CAVE = (0x36A7FA, 0x36A850)   # body of GRANT_JNI[0]
 UNLOCK_CAVE = (0x36A852, 0x36A8A8)   # body of GRANT_JNI[1]
+TUTORIAL_CAVE = (0x36A8AA, 0x36A900)  # body of GRANT_JNI[2]
 
 TAB_NAME = b"RR MOD"
 CARD_FILE = b"rr_mod_card.ccb"
@@ -321,10 +329,39 @@ GRANTS = {
 }
 
 
-def _unlock_all(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int) -> bytes:
-    """+100M cash, +100M diamonds, max level, max friends, max buildings."""
+def _tutorial_wrappers(max_level: int, max_chars: int, max_builds: int) -> tuple[bytes, dict[str, int]]:
+    """end_tutorial(), and max level / friends / buildings that call it first."""
+    a = Asm(TUTORIAL_CAVE[0])
+    a.label("end_tutorial")
+    a.push(4, lr=True)
+    a.bl(LOGIC_MANAGER)
+    a.ldr(3, 0)
+    a.ldr(3, 3, LM_TUTORIAL_LOGIC)
+    a.blx_reg(3)
+    a.addr(4, 0)                  # r4 = TutorialLogic
+    a.ldr(0, 4, 0x2C)             # TutorialState
+    a.bl(IS_TUTORIAL_ACTIVE)
+    a.cmp_imm(0, 0)
+    a.bcc("eq", "end_done")
+    a.addr(0, 4)
+    a.bl(STOP_TUTORIAL)
+    a.label("end_done")
+    a.pop(4, pc=True)
+    for name, target in (("max_level", max_level), ("max_friends", max_chars), ("max_buildings", max_builds)):
+        a.label(name)
+        a.push(4, lr=True)
+        a.bl("end_tutorial")
+        a.bl(target)
+        a.pop(4, pc=True)
+    blob = a.assemble()
+    return blob, {k: a.labels[k] for k in ("end_tutorial", "max_level", "max_friends", "max_buildings")}
+
+
+def _unlock_all(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int, end_tutorial: int) -> bytes:
+    """End an active tutorial, then +100M cash, +100M diamonds, max level, friends, buildings."""
     a = Asm(UNLOCK_CAVE[0])
     a.push(4, lr=True)
+    a.bl(end_tutorial)
     for wallet in ("coins", "hearts"):
         a.ldr_const(1, 100 * MILLION)
         a.bl(helpers[wallet])
@@ -335,7 +372,7 @@ def _unlock_all(helpers: dict[str, int], levels: dict[str, int], max_chars: int,
     return a.assemble()
 
 
-def _dispatch(helpers: dict[str, int], levels: dict[str, int], max_chars: int, max_builds: int) -> bytes:
+def _dispatch(helpers: dict[str, int], levels: dict[str, int], wrappers: dict[str, int]) -> bytes:
     """dispatch(tag in r0): run the native part of a button."""
     a = Asm(DISPATCH_CAVE[0])
     a.push(4, lr=True)
@@ -349,9 +386,9 @@ def _dispatch(helpers: dict[str, int], levels: dict[str, int], max_chars: int, m
         a.label(f"not{tag}")
     for tag, target in (
         (5, levels["level"]),
-        (7, levels["max_level"]),
-        (8, max_chars),
-        (9, max_builds),
+        (7, wrappers["max_level"]),
+        (8, wrappers["max_friends"]),
+        (9, wrappers["max_buildings"]),
         (10, UNLOCK_CAVE[0]),
     ):
         a.cmp_imm(4, tag)
@@ -470,8 +507,10 @@ def install(data: bytearray, class_string: int, init_cave_start: int) -> None:
     _put(data, CHAR_CAVE, _max_characters(), "max characters")
     _put(data, BUILD_CAVE, _max_buildings(), "max buildings")
     _put(data, TITLE_CAVE, _titles(), "section titles")
-    _put(data, UNLOCK_CAVE, _unlock_all(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0]), "unlock all")
-    _put(data, DISPATCH_CAVE, _dispatch(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0]), "dispatcher")
+    wrappers_blob, wrappers = _tutorial_wrappers(levels["max_level"], CHAR_CAVE[0], BUILD_CAVE[0])
+    _put(data, TUTORIAL_CAVE, wrappers_blob, "tutorial wrappers")
+    _put(data, UNLOCK_CAVE, _unlock_all(helpers, levels, CHAR_CAVE[0], BUILD_CAVE[0], wrappers["end_tutorial"]), "unlock all")
+    _put(data, DISPATCH_CAVE, _dispatch(helpers, levels, wrappers), "dispatcher")
     _expect(data, SPRITE_INIT_FRAME, bytes.fromhex("70b50a1c"))
     _put(data, SPRITE_CAVE, _sprite_guard(), "sprite guard")
     data[SPRITE_INIT_FRAME : SPRITE_INIT_FRAME + 4] = _b_wide(SPRITE_INIT_FRAME, SPRITE_CAVE[0])
