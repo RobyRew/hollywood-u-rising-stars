@@ -399,6 +399,11 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=ROOT / "dist" / APK_NAME)
     parser.add_argument("--java", type=Path, default=None, help="java binary; defaults to JAVA_HOME or PATH")
     parser.add_argument("--work", type=Path, default=ROOT / "build" / "decoded")
+    parser.add_argument(
+        "--debuggable",
+        action="store_true",
+        help="test builds only: mark the app debuggable so adb run-as can read and write its data",
+    )
     args = parser.parse_args()
 
     java = args.java
@@ -416,6 +421,11 @@ def main() -> int:
     run([str(java), "-Xmx3g", "-jar", str(apktool), "d", "-f", "-o", str(args.work), str(args.apk)])
     patch_apktool_yml(args.work / "apktool.yml")
     patch_manifest(args.work / "AndroidManifest.xml")
+    if args.debuggable:
+        manifest = args.work / "AndroidManifest.xml"
+        text = manifest.read_text(encoding="utf-8")
+        text = text.replace("<application ", '<application android:debuggable="true" ', 1)
+        manifest.write_text(text, encoding="utf-8")
     patch_styles(args.work)
     patch_smali_tree(args.work / "smali")
     strings = args.work / "assets" / "strings.json"
