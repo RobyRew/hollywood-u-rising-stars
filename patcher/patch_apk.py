@@ -438,7 +438,7 @@ def main() -> int:
         helper.write_text(lua.replace(old_wait, new_wait, 1), encoding="utf-8")
     assets = args.work / "assets"
     (assets / "rr_mod_card.ccb").write_bytes(build_card((assets / "android_settings_card.ccb").read_bytes()))
-    config = assets / "Config.protobin"
+    config = assets / "config.protobin"
     config.write_bytes(add_config_style(config.read_bytes()))
     patch_native_libs(args.work)
 

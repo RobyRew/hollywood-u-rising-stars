@@ -130,6 +130,10 @@ GET_STATIC_METHOD = 0x35FD98
 PURCHASE_FINISH = 0x3A44AA
 PAYOUT_EPILOGUE = 0x3A4540
 
+# Config::loadConfigFile: beq over the signature check, and the parse it skips to.
+CONFIG_SIG_BRANCH = 0x37EFE2
+CONFIG_PARSE = 0x37F096
+
 CAVE = SERVER_TIME_FAIL + 18  # immediately after the 18-byte time trampoline
 
 EXPECTED = {
@@ -426,6 +430,12 @@ def patch_libhss(path: Path) -> None:
     data[0x3F4EC8 : 0x3F4EC8 + 2] = _movs_imm(0, 0)
     data[0x3F4EEA : 0x3F4EEA + 2] = _movs_imm(0, 0)
     data[0x3F4EFA : 0x3F4EFA + 2] = _movs_imm(0, 0)
+    # Config::loadConfigFile checks config.protobin.sig (RSA) whenever the path
+    # contains "config.protobin" (strstr) and drops the config on a mismatch.
+    # rr_card adds a style entry to config.protobin, so the branch that skips
+    # the check is taken always.
+    _expect(data, CONFIG_SIG_BRANCH, bytes.fromhex("58d0"))
+    data[CONFIG_SIG_BRANCH : CONFIG_SIG_BRANCH + 2] = _b_short(CONFIG_SIG_BRANCH, CONFIG_PARSE)
     # RR MOD tab in the game's Settings dialog. See rr_tab.py.
     rr_tab.install(data, menu_class, OFFLINE_CAVE + len(menu))
     path.write_bytes(data)
