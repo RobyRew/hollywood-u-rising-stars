@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 COMPAT = ROOT / "patcher" / "ModernCompat.smali"
 # Releases are 1.0.x. Bump only VERSION_PATCH (and add a CHANGELOG.md section).
-VERSION_PATCH = 0
+VERSION_PATCH = 1
 VERSION_NAME = f"1.0.{VERSION_PATCH}"
 # versionCode stays above the pre-1.0.0 builds (10000 + 20..24), so 1.0.0
 # installs over them as an update: 1.0.0 -> 10100, 1.0.1 -> 10101.

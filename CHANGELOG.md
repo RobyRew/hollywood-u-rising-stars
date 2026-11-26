@@ -5,6 +5,18 @@ Each `## <version>` section is the release note for that version. The
 `VERSION_NAME` in `patcher/patch_apk.py`. Add a new section with only what
 changed before bumping `VERSION_PATCH`.
 
+## 1.0.1
+
+### Fixed
+- A new game could get stuck on the tutorial step "Level up! Select yourself"
+  after **UNLOCK ALL** or **MAX FRIENDS**: your own character was already at
+  the top level, so the workshop marked every character *Ineligible*. **MAX
+  LEVEL**, **MAX FRIENDS**, **MAX BUILDINGS** and **UNLOCK ALL** now end a
+  running tutorial first, through the game's own end-of-tutorial routine
+  (which also saves the game).
+- A game already stuck on that step: tap **MAX LEVEL** or **UNLOCK ALL** in
+  Settings → RR MOD once to end the tutorial.
+
 ## 1.0.0
 
 First release of the RR Mod for **Hollywood U: Rising Stars 3.8.0**, the last

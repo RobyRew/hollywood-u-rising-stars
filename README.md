@@ -85,6 +85,7 @@ Open the game's **Settings** (Help · Settings · Alerts) and pick the fourth ta
 
 - **UNLOCK ALL** adds 100M cash and 100M diamonds, sets the top player level and maxes every friend, A-lister and building.
 - **RESET** asks first, then deletes the save on the phone and starts a new game.
+- **MAX LEVEL**, **MAX FRIENDS**, **MAX BUILDINGS** and **UNLOCK ALL** end a running tutorial first, so a new game cannot get stuck on a tutorial step that waits for a character who is already maxed.
 - Every grant stops at **2,000,000,000**, so no counter wraps past the 32-bit limit.
 - The Settings tab's **BACKUP SAVE** button starts an export. There are no floating buttons or Android pop-ups.
 
